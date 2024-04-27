@@ -33,7 +33,7 @@ def send_mail(notice_title, notice_msg, peoples):
             server.login(sender_email, password)
             text = message.as_string()
             server.sendmail(sender_email, receiver_email, text)
-            print(f'sent to {receiver_email}')
+            print(f'sent to {receiver_email}') # remove this line later
             sleep(5) # sleep for 5 sec
 
 
