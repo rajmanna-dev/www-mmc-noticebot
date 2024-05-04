@@ -78,10 +78,10 @@ def scrape_notice():
 # Main
 def main():
     with ThreadPoolExecutor(max_workers=2) as executor:
-        schedule.every().hour.do(scrape_notice)
+        schedule.every(20).seconds.do(scrape_notice) #NOTE change the time later
         while True:
             schedule.run_pending()
-            sleep(60)
+            sleep(5) #NOTE change the time later
 
 
 if __name__ == '__main__':
