@@ -4,25 +4,29 @@ import requests
 import schedule
 import pdfplumber
 from time import sleep
-from bs4 import BeautifulSoup # type: ignore
+from pymongo import MongoClient
+from bs4 import BeautifulSoup  # type: ignore
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from concurrent.futures import ThreadPoolExecutor
 
 import config
 
+# Database connection code
+client = MongoClient('localhost', 27017)
+database = client.noticeBot
+users = database.users
+
 previous_notice = []
+sender_email = config.FROM
+password = config.PASSWORD
 
 
 # Send bulk mails
-def send_mail(notice_title, notice_msg, peoples):
-    sender_email = config.FROM
-    password = config.PASSWORD
-
-    for receiver_email in peoples:
+def send_mail(notice_title, notice_msg, subscribers):
+    for subscriber_email in subscribers:
         message = MIMEMultipart()
         message['From'] = sender_email
-        message['To'] = receiver_email
+        message['To'] = subscriber_email
         message['Subject'] = notice_title
 
         body = notice_msg
@@ -32,9 +36,8 @@ def send_mail(notice_title, notice_msg, peoples):
             server.starttls()
             server.login(sender_email, password)
             text = message.as_string()
-            server.sendmail(sender_email, receiver_email, text)
-            print(f'sent to {receiver_email}') # remove this line later
-            sleep(5) # sleep for 5 sec
+            server.sendmail(sender_email, subscriber_email, text)
+            sleep(5)  # sleep for 5 sec
 
 
 # Get text from notice pdf
@@ -52,8 +55,8 @@ def extract_data_from_pdf(file_link):
 
 # Process the first row of notice table
 def process_table_rows(row):
-    notice_title = row.select_one('td:nth-of-type(2)').get_text() # Get notice title
-    notice_path = config.DOMAIN + row.select_one('td:nth-of-type(3) a')['href'].replace(' ', '%20') # Get notice link
+    notice_title = row.select_one('td:nth-of-type(2)').get_text()  # Get notice title
+    notice_path = config.DOMAIN + row.select_one('td:nth-of-type(3) a')['href'].replace(' ', '%20')  # Get notice link
     return notice_title, notice_path
 
 
@@ -62,28 +65,32 @@ def scrape_notice():
     url = config.NOTICE_URL
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
-    tr = soup.find_all('tr')[1] # Get the first row
+    tr = soup.find_all('tr')[1]  # Get the first row
 
     global previous_notice
     if tr != previous_notice:
         notice_title, notice_link = process_table_rows(tr)
         notice_text = extract_data_from_pdf(notice_link)
-        # TODO Emails should be dynamic
-        send_mail(notice_title, notice_text, ['rajmanna7734@gmail.com', 'raj9163cu@gmail.com'])
+        # If notice text is empty
+        if not notice_text:
+            notice_text = f"Unable to fetch notice content."
+        if users.count_documents({}) != 0:
+            subscribed_users = [user['useremail'] for user in users.find()]
+            send_mail(notice_title, notice_text + "\n" + notice_link, subscribed_users)
         previous_notice = tr
     else:
+        # TODO Remove this line later
         print("Notice already sent!")
 
 
-# Main
-def main():
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        schedule.every(20).seconds.do(scrape_notice) #NOTE change the time later
-        while True:
-            schedule.run_pending()
-            sleep(5) #NOTE change the time later
+# BOT
+def bot():
+    schedule.every(60).seconds.do(scrape_notice)
+    while True:
+        schedule.run_pending()
+        sleep(5)
 
 
 if __name__ == '__main__':
-    main()
+    bot()
     

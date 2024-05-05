@@ -19,6 +19,29 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
+.success {
+    display: flex;
+    color: #38b000;
+    font-size: 1.4rem;
+    margin-top: 0.6rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.error {
+    display: flex;
+    color: #c1121f;
+    font-size: 1.4rem;
+    margin-top: 0.6rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.error svg,
+.success svg {
+    margin-right: 6px;
+}
+
 .underline {
   color: #e8e8e8;
   text-decoration: underline;
@@ -175,6 +198,22 @@ main {
   margin: 1.5rem auto;
 }
 
+.features {
+    padding: 0 2rem;
+    color: #6f7d92;
+    list-style: none;
+    font-size: 1.8rem;
+}
+
+.features li {
+    display: flex;
+    margin-top: 1.4rem;
+}
+
+.features svg {
+    margin: 0 6px 6px 6px;
+}
+
 /* Subscribe Section */
 .subscribe--section {
   width: 500px;
@@ -219,11 +258,11 @@ main {
   color: #cbd5e1;
   font-size: 1.8rem;
   border-radius: 20px;
-  background-color: rgb(36, 172, 36);
+  background-color: #28a745;
 }
 
 #btn--subscribe:hover {
-  background-color: rgb(57, 201, 57);
+  background-color: #1A9937;
 }
 
 /* Footer Section */
@@ -268,6 +307,21 @@ hr {
   margin-bottom: 1.2rem;
 }
 
+/* 404 Error */
+.error--page {
+    height: 100vh;
+    display: flex;
+    color: #6f7d92;
+    font-size: 1.82rem;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.error--page p {
+    margin-top: 2rem;
+}
+
 /* Styles for small screen devices */
 @media (max-width: 667px) {
   .nav--menus {
@@ -288,6 +342,11 @@ hr {
 
   .intro--text {
     width: 310px;
+  }
+
+  .features li {
+    align-items: center;
+    flex-direction: column
   }
 
   #intro--headline {
@@ -319,4 +378,8 @@ hr {
   hr {
     margin: 3rem 2rem 1.5rem 2rem;
   }
+
+  .error--page {
+    text-align: center;
+}
 }

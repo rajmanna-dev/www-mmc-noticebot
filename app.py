@@ -4,39 +4,53 @@ import re
 
 app = Flask(__name__)
 
-client = MongoClient('localhost', 27017)
-database = client.noticeBot
-users = database.users
 
-errors = []
-
-
-def validate_user(username, useremail):
-    if username == '':
+def validate_user(username, useremail, email_regex, collection_name):
+    errors = []
+    # Varify username
+    if not username:
         errors.append('Name is required')
     elif len(username) < 2:
         errors.append('Name must contain at least two characters')
-
-    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
-    if useremail == '':
+    # Varify useremail
+    if not useremail:
         errors.append('Email is required')
-    elif not re.match(regex, useremail):
+    elif not email_regex.match(useremail):
         errors.append('Invalid Email ID')
+    else:
+        existing_user = collection_name.find_one({'useremail': useremail.lower()})
+        if existing_user:
+            errors.append('Email already exists')
     return errors
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    warnings = None
+    success = False
     if request.method == 'POST':
-        check_errors = validate_user(request.form['userName'], request.form['userEmail'])
-        if check_errors:
-            warnings = check_errors
-        else:
-            users.insert_one({'username': request.form['userName'].lower().replace(' ', ''), 'useremail': request.form['userEmail'].lower()})
-            print('Inserted!')
+        user_name = request.form['userName'].lower().replace(' ', '')
+        user_email = request.form['userEmail'].lower()
 
-    return render_template('index.html', warnings=warnings)
+        email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')
+        # Database connection code
+        client = MongoClient('localhost', 27017)
+        database = client.noticeBot
+        users_collection = database.users
+
+        check_errors = validate_user(user_name, user_email, email_regex, users_collection)
+        if check_errors:
+            client.close()
+            return render_template('index.html', errors=check_errors)
+        else:
+            users_collection.insert_one({'username': user_name, 'useremail': user_email})
+            client.close()
+            success = True
+    return render_template('index.html', errros=None, success=success)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html')
 
 
 if __name__ == '__main__':
