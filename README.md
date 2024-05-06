@@ -1,6 +1,10 @@
-# NoticeBot
+# MMC NoticeBot
 
-NoticeBot is a Python application for scraping notices from a student notice page, extracting information from PDF notices, and sending email notifications to subscribed users.
+MMC NoticeBot is a Python application for scraping notices from a student notice page, extracting information from PDF notices, and sending email notifications to subscribed users.
+
+<div style="text-align:center">
+   <img src="static/img/logo.png">
+</div>
 
 ## Features
 
@@ -15,7 +19,7 @@ NoticeBot is a Python application for scraping notices from a student notice pag
    ```bash
    # Clone the repo
    
-   git clone https://github.com/rajmanna-dev/MMC-Notice-Automation.git
+   git clone https://github.com/rajmanna-dev/MMC-NoticeBot.git
     ```
 2. Install dependencies:
 
@@ -51,7 +55,7 @@ You need to set up the following configuration parameters in `config.py`:
 
 ## Contributing
 
-Contributions are welcome! If you'd like to contribute to MMC-Notice-Bot, please follow these steps:
+Contributions are welcome! If you'd like to contribute to MMC NoticeBot, please follow these steps:
 
 1. Fork the repository.
 2. Create a new branch (`git checkout -b feature/your-feature-name`).
@@ -66,4 +70,4 @@ This project is licensed under the MIT License - see the [LICENSE](license.txt) 
 
 ## Credits
 
-MMC Notice Bot was created by Educational Toolkit for Students (ETS).
+MMC NoticeBot was created by Educational Toolkit for Students (ETS).
