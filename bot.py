@@ -4,8 +4,8 @@ import requests
 import schedule
 import pdfplumber
 from time import sleep
+from bs4 import BeautifulSoup
 from pymongo import MongoClient
-from bs4 import BeautifulSoup  # type: ignore
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -32,11 +32,12 @@ def send_mail(notice_title, notice_msg, subscribers):
         body = notice_msg
         message.attach(MIMEText(body, 'plain'))
 
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+        with smtplib.SMTP(config.MAIL_SERVER, config.MAIL_PORT) as server:
             server.starttls()
             server.login(sender_email, password)
             text = message.as_string()
             server.sendmail(sender_email, subscriber_email, text)
+            print(f"Mail sent from {sender_email} to {subscriber_email}")  # TODO Remove this line of code later
             sleep(5)  # sleep for 5 sec
 
 
