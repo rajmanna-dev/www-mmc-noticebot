@@ -1,7 +1,7 @@
 import os
+import config
 import smtplib
 import requests
-import schedule
 import pdfplumber
 from time import sleep
 from bs4 import BeautifulSoup
@@ -9,8 +9,8 @@ from pymongo import MongoClient
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from apscheduler.schedulers.background import BackgroundScheduler
 
-import config
 
 previous_notice = []
 sender_email = config.FROM
@@ -29,18 +29,19 @@ def cleanup_expired_tokens():
 
 # Send bulk mails
 def send_mail(notice_title, notice_msg, subscribers):
-    for subscriber_email in subscribers:
-        message = MIMEMultipart()
-        message['From'] = sender_email
-        message['To'] = subscriber_email
-        message['Subject'] = notice_title
+    with smtplib.SMTP(config.MAIL_SERVER, config.MAIL_PORT) as server:
+        server.starttls()
+        server.login(sender_email, password)
 
-        body = notice_msg
-        message.attach(MIMEText(body, 'plain'))
+        for subscriber_email in subscribers:
+            message = MIMEMultipart()
+            message['From'] = sender_email
+            message['To'] = subscriber_email
+            message['Subject'] = notice_title
 
-        with smtplib.SMTP(config.MAIL_SERVER, config.MAIL_PORT) as server:
-            server.starttls()
-            server.login(sender_email, password)
+            body = notice_msg
+            message.attach(MIMEText(body, 'plain'))
+
             text = message.as_string()
             server.sendmail(sender_email, subscriber_email, text)
             print(f"Mail sent from {sender_email} to {subscriber_email}")  # TODO Remove this line of code later
@@ -79,7 +80,6 @@ def scrape_notice():
         notice_title, notice_link = process_table_rows(tr)
         notice_text = extract_data_from_pdf(notice_link)
 
-        # Database connection code
         client = MongoClient('localhost', 27017)
         database = client.noticeBot
         users = database.users
@@ -89,7 +89,7 @@ def scrape_notice():
             notice_text = f"Unable to fetch notice content."
         if users.count_documents({}) != 0:
             subscribed_users = [user.get('confirmed_email') for user in users.find()]
-            subscribed_users = [email for email in subscribed_users if email]
+            subscribed_users = [confirmed_email for confirmed_email in subscribed_users if confirmed_email]
             send_mail(notice_title, notice_text + "\n" + notice_link, subscribed_users)
         previous_notice = tr
     else:
@@ -97,15 +97,10 @@ def scrape_notice():
         print("Notice already sent!")
 
 
-# BOT
-def bot():
-    schedule.every(60).seconds.do(scrape_notice)
-    schedule.every().day.at("03:00").do(cleanup_expired_tokens)
-    while True:
-        schedule.run_pending()
-        sleep(5)
+scheduler = BackgroundScheduler()
+scheduler.add_job(scrape_notice, 'interval', seconds=60)
+scheduler.add_job(cleanup_expired_tokens, 'cron', hour=3)
+scheduler.start()
 
-
-if __name__ == '__main__':
-    bot()
-    
+while True:
+    sleep(5)

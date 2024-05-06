@@ -64,18 +64,17 @@
             </p>
           {% endfor %}
         {% endif %}
-          {% if message == "An email verification is sent to your email" %}
-            <p class="success">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
-              An email verification is sent to your index
-              </p>
-          {% endif %}
-          {% if message == "Please try again with another email address" %}
-            <p class="warning">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                Please try again with another email address
-              </p>
-          {% endif %}
+        {% if message == "An email verification is sent to your email address" %}
+          <p class="success">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
+            An email verification is sent to your index
+            </p>
+        {% elif message == "Please try again with another email address" %}
+          <p class="warning">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+              Please try again with another email address
+            </p>
+        {% endif %}
         <form method="post" class="subscribe--form" id="subs--form">
           <input
             type="text"
@@ -121,8 +120,8 @@
             <p class="footer-p">Supports</p>
             <ul class="footer--list">
               <li>
-                <a href="mailto:ets.devs@yahoo.com"
-                  >Email: ets.devs@yahoo.com</a
+                <a href="mailto:wts.devs@yahoo.com"
+                  >Email: wts.devs@yahoo.com</a
                 >
               </li>
             </ul>
@@ -130,7 +129,7 @@
         </div>
         <hr />
         <div class="copyright--text text-center">
-          <p>Copyright &copy; 2024 Educational Toolkit for Students</p>
+          <p>Copyright &copy; 2024 Web Tools for Students</p>
         </div>
       </footer>
     </main>
