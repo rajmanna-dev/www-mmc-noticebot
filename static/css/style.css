@@ -28,6 +28,15 @@ body {
     justify-content: center;
 }
 
+.warning {
+    display: flex;
+    color: #f0ad4e;
+    font-size: 1.4rem;
+    margin-top: 0.6rem;
+    align-items: center;
+    justify-content: center;
+}
+
 .error {
     display: flex;
     color: #c1121f;
@@ -38,7 +47,8 @@ body {
 }
 
 .error svg,
-.success svg {
+.success svg,
+.warning svg {
     margin-right: 6px;
 }
 

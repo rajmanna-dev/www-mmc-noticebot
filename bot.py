@@ -6,19 +6,25 @@ import pdfplumber
 from time import sleep
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
+from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 import config
 
-# Database connection code
-client = MongoClient('localhost', 27017)
-database = client.noticeBot
-users = database.users
-
 previous_notice = []
 sender_email = config.FROM
 password = config.PASSWORD
+
+
+# Cleanup the expired tokens every day at 3:00
+def cleanup_expired_tokens():
+    expired_cutoff = datetime.now() - timedelta(hours=1)
+    client = MongoClient('localhost', 27017)
+    database = client.noticeBot
+    users = database.users
+    users.delete_many({'token_expiration': {'$lt': expired_cutoff}})
+    client.close()
 
 
 # Send bulk mails
@@ -72,11 +78,18 @@ def scrape_notice():
     if tr != previous_notice:
         notice_title, notice_link = process_table_rows(tr)
         notice_text = extract_data_from_pdf(notice_link)
+
+        # Database connection code
+        client = MongoClient('localhost', 27017)
+        database = client.noticeBot
+        users = database.users
+
         # If notice text is empty
         if not notice_text:
             notice_text = f"Unable to fetch notice content."
         if users.count_documents({}) != 0:
-            subscribed_users = [user['useremail'] for user in users.find()]
+            subscribed_users = [user.get('confirmed_email') for user in users.find()]
+            subscribed_users = [email for email in subscribed_users if email]
             send_mail(notice_title, notice_text + "\n" + notice_link, subscribed_users)
         previous_notice = tr
     else:
@@ -87,6 +100,7 @@ def scrape_notice():
 # BOT
 def bot():
     schedule.every(60).seconds.do(scrape_notice)
+    schedule.every().day.at("03:00").do(cleanup_expired_tokens)
     while True:
         schedule.run_pending()
         sleep(5)
