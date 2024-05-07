@@ -10,18 +10,21 @@ from flask import Flask, request, render_template
 
 app = Flask(__name__)
 
+# Mongodb client initialization
+client = MongoClient('localhost', 27017)
+database = client.noticeBot
+users_collection = database.users
+
 app.config.update(
     MAIL_SERVER=config.MAIL_SERVER,
     MAIL_PORT=config.MAIL_PORT,
     MAIL_USE_TLS=config.MAIL_USE_TLS,
     MAIL_USERNAME=config.FROM,
-    MAIL_PASSWORD=config.PASSWORD,
+    MAIL_PASSWORD=config.PASSWORD
 )
 
 mail = Mail(app)
-client = MongoClient('localhost', 27017)
-database = client.noticeBot  # Select the `noticebot` document
-users_collection = database.users  # Select the `users` collection
+
 email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')  # Regex for validate email format
 
 
@@ -64,14 +67,16 @@ def index():
         user_email = request.form['userEmail'].lower()
         check_errors = validate_user(user_name, user_email)
         if check_errors:
-            client.close()
             return render_template('index.html', errors=check_errors)
         else:
             verification_token = str(uuid4())
             token_expiration = datetime.now() + timedelta(hours=1)
-            users_collection.insert_one(
-                {'username': user_name, 'useremail': user_email, 'verification_token': verification_token, 'token_expiration': token_expiration})  # Store user's details
-            client.close()
+            users_collection.insert_one({
+                'username': user_name,
+                'useremail': user_email,
+                'verification_token': verification_token,
+                'token_expiration': token_expiration
+            })
             if send_verification_mail(request.form['userName'], user_email, verification_token):
                 message = "An email verification is sent to your email address"
             else:
@@ -84,16 +89,18 @@ def verify_email():
     token = request.args.get('token')
     if token:
         user = users_collection.find_one({'verification_token': token})
-        if user:
-            if user.get('token_expiration') and user['token_expiration'] > datetime.now():
-                users_collection.update_one({'_id': user['_id']}, {'$unset': {'verification_token': '', 'token_expiration': ''}})
-                users_collection.update_one({'_id': user['_id']}, {'$set': {'confirmed_email': user['useremail']}}, upsert=True)
-                client.close()
-                return message_style.verification_success
-            else:
-                return message_style.verification_link_expired
+        if user and user['token_expiration'] > datetime.now():
+            users_collection.update_one(
+                {'_id': user['_id']},
+                {
+                    '$unset': {'verification_token': '', 'token_expiration': ''},
+                    '$set': {'confirmed_email': user['useremail']}
+                },
+                upsert=True
+            )
+            return message_style.verification_success
         else:
-            return message_style.invalid_token_or_user
+            return message_style.verification_link_expired
     else:
         return message_style.invalid_token
 
@@ -104,4 +111,4 @@ def page_not_found(e):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='192.168.0.101', port=8080)
+    app.run(debug=True, host='127.0.0.1', port=8080)

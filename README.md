@@ -2,10 +2,6 @@
 
 MMC NoticeBot is a Python application for scraping notices from a student notice page, extracting information from PDF notices, and sending email notifications to subscribed users.
 
-<div style="text-align:center">
-   <img src="static/img/logo.png">
-</div>
-
 ## Features
 
 - **Notice Scraping**: Automatically scrapes the student notice page at regular intervals.
@@ -70,4 +66,4 @@ This project is licensed under the MIT License - see the [LICENSE](license.txt) 
 
 ## Credits
 
-MMC NoticeBot was created by Educational Toolkit for Students (ETS).
+MMC NoticeBot was created by Web Tools for Students (WTS).
