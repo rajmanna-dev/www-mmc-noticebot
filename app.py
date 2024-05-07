@@ -11,8 +11,8 @@ from flask import Flask, request, render_template
 app = Flask(__name__)
 
 # Mongodb client initialization
-client = MongoClient('localhost', 27017)
-database = client.noticeBot
+client = MongoClient(config.MONGODB_URL)
+database = client.mmc_noticebot
 users_collection = database.users
 
 app.config.update(
@@ -78,7 +78,7 @@ def index():
                 'token_expiration': token_expiration
             })
             if send_verification_mail(request.form['userName'], user_email, verification_token):
-                message = "An email verification is sent to your email address"
+                message = "An email verification is sent to your inbox"
             else:
                 message = "Please try again with another email address"
     return render_template('index.html', errros=None, message=message)
@@ -111,4 +111,4 @@ def page_not_found(e):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=8000)
+    app.run(debug=True, host='127.0.0.1', port=8080)

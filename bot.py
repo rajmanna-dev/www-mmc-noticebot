@@ -12,8 +12,8 @@ from email.mime.multipart import MIMEMultipart
 from apscheduler.schedulers.background import BackgroundScheduler
 
 # Mongodb client initialization
-client = MongoClient('localhost', 27017)
-database = client.noticeBot
+client = MongoClient(config.MONGODB_URL)
+database = client.mmc_noticebot
 users_collection = database.users
 
 previous_notice = []
@@ -90,7 +90,7 @@ def scrape_notice():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(scrape_notice, 'interval', minutes=30)
+scheduler.add_job(scrape_notice, 'interval', minutes=1)
 scheduler.add_job(cleanup_expired_tokens, 'cron', hour=3)
 scheduler.start()
 
