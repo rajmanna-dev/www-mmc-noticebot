@@ -7,10 +7,8 @@ from flask_mail import Mail, Message
 from datetime import datetime, timedelta
 from flask import Flask, request, render_template
 
-
 app = Flask(__name__)
 
-# Mongodb client initialization
 client = MongoClient(config.MONGODB_URL)
 database = client.mmc_noticebot
 users_collection = database.users
@@ -111,4 +109,4 @@ def page_not_found(e):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=8080)
+    app.run(debug=True, host='127.0.0.1', port=8000)

@@ -70,7 +70,7 @@ def scrape_notice():
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
     tr = soup.find_all('tr')[1]  # Get the first row
-    print("scraped!")
+    print("scraped!")  # TODO Remove this line later
 
     global previous_notice
     if tr != previous_notice:
@@ -90,7 +90,7 @@ def scrape_notice():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(scrape_notice, 'interval', minutes=1)
+scheduler.add_job(scrape_notice, 'interval', minutes=30)
 scheduler.add_job(cleanup_expired_tokens, 'cron', hour=3)
 scheduler.start()
 
