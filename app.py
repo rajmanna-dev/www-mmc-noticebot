@@ -22,7 +22,6 @@ app.config.update(
 )
 
 mail = Mail(app)
-
 email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')  # Regex for validate email format
 
 
@@ -109,4 +108,4 @@ def page_not_found(e):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=8000)
+    app.run(debug=True, host='192.168.0.101', port=8000)
