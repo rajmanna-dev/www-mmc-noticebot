@@ -1,5 +1,5 @@
 from waitress import serve
-import app
+import main
 
 if __name__ == '__main__':
-    serve(app.app, host='192.168.0.101', port=8080)
+    serve(main.app, port=int("3000"))

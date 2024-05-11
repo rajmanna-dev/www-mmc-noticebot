@@ -30,11 +30,15 @@ def validate_user(username, useremail):
     errors = []
     if not username:
         errors.append('Name is required')
-    elif len(username) < 2:
-        errors.append('Name must contain at least two characters')
+    elif len(username) < 3:
+        errors.append('Name must contain at least three characters')
+    elif len(username) > 255:
+        errors.append('Bad input. Name is too long')
 
     if not useremail:
         errors.append('Email is required')
+    elif len(useremail) > 255:
+        errors.append('Bad input. Email is too long')
     elif not email_regex.match(useremail):
         errors.append('Invalid Email ID')
     elif users_collection.count_documents({'useremail': useremail.lower()}) != 0:
@@ -108,6 +112,7 @@ def subscription_granted():
 def token_expired():
     return render_template('token_expired.html')
 
+
 @app.route('/invalid-token')
 def invalid_token():
     return render_template('invalid_token.html')
@@ -119,4 +124,4 @@ def page_not_found(e):
 
 
 # if __name__ == '__main__':
-#     app.run(debug=True, host='192.168.0.101', port=8000)
+#     app.run(debug=True, host='192.168.0.101', port=int("8000"))
