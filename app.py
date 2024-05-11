@@ -4,6 +4,7 @@ from uuid import uuid4
 from pymongo import MongoClient
 from flask_mail import Mail, Message
 from datetime import datetime, timedelta
+from email_message import verification_email_content
 from flask import Flask, request, render_template, redirect
 
 app = Flask(__name__)
@@ -46,12 +47,11 @@ def validate_user(username, useremail):
 def send_verification_mail(username, useremail, verification_token):
     msg = Message('Email Verification Required for Your Account', sender=config.FROM, recipients=[useremail])
     verification_link = request.url_root + f"verify?token={verification_token}"
-    msg.body = f'''Dear {username},\n\nI hope this message finds you well.\n\nWe kindly request your attention to complete the verification process for your email associated with our platform. This step ensures the security and integrity of your account.\n\nPlease click on the following link to verify your email (expired after 1 hour): {verification_link}\n\nShould you encounter any difficulties or have any questions, please do not hesitate to reach out to our support team for assistance.\n\nThank you for your cooperation.'''
+    msg.body = verification_email_content(username, verification_link)
     try:
         mail.send(msg)
         return True
-    except Exception as e:
-        print(e)
+    except Exception:
         return False
 
 
@@ -73,7 +73,7 @@ def index():
                 'verification_token': verification_token,
                 'token_expiration': token_expiration
             })
-            if send_verification_mail(request.form['userName'], user_email, verification_token):
+            if send_verification_mail(user_name, user_email, verification_token):
                 message = True
     return render_template('index.html', errros=None, message=message)
 
