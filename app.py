@@ -1,11 +1,10 @@
 import re
 import config
-import message_style
 from uuid import uuid4
 from pymongo import MongoClient
 from flask_mail import Mail, Message
 from datetime import datetime, timedelta
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect
 
 app = Flask(__name__)
 
@@ -58,7 +57,7 @@ def send_verification_mail(username, useremail, verification_token):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    message = ""
+    message = False
     if request.method == 'POST':
         user_name = request.form['userName'].lower().replace(' ', '')
         user_email = request.form['userEmail'].lower()
@@ -74,10 +73,9 @@ def index():
                 'verification_token': verification_token,
                 'token_expiration': token_expiration
             })
+            print('data stored!')
             if send_verification_mail(request.form['userName'], user_email, verification_token):
-                message = "An email verification is sent to your inbox"
-            else:
-                message = "Please try again with another email address"
+                message = True
     return render_template('index.html', errros=None, message=message)
 
 
@@ -95,11 +93,25 @@ def verify_email():
                 },
                 upsert=True
             )
-            return render_template('subscription_granted.html')
+            return redirect('/subscription-granted')
         else:
-            return render_template('token_expired.html')
+            return redirect('/token-expired')
     else:
-        return render_template('invalid_token.html')
+        return redirect('/invalid-token')
+
+
+@app.route('/subscription-granted')
+def subscription_granted():
+    return render_template('subscription_granted.html')
+
+
+@app.route('/token-expired')
+def token_expired():
+    return render_template('token_expired.html')
+
+@app.route('/invalid-token')
+def invalid_token():
+    return render_template('invalid_token.html')
 
 
 @app.errorhandler(404)
@@ -107,5 +119,5 @@ def page_not_found(e):
     return render_template('404.html')
 
 
-if __name__ == '__main__':
-    app.run(debug=True, host='192.168.0.101', port=8000)
+# if __name__ == '__main__':
+#     app.run(debug=True, host='192.168.0.101', port=8000)
