@@ -73,7 +73,6 @@ def index():
                 'verification_token': verification_token,
                 'token_expiration': token_expiration
             })
-            print('data stored!')
             if send_verification_mail(request.form['userName'], user_email, verification_token):
                 message = True
     return render_template('index.html', errros=None, message=message)
