@@ -95,11 +95,11 @@ def verify_email():
                 },
                 upsert=True
             )
-            return message_style.verification_success
+            return render_template('subscription_granted.html')
         else:
-            return message_style.verification_link_expired
+            return render_template('token_expired.html')
     else:
-        return message_style.invalid_token
+        return render_template('invalid_token.html')
 
 
 @app.errorhandler(404)

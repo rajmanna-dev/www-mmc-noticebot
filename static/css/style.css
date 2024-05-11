@@ -19,37 +19,37 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
-.success {
-    display: flex;
-    color: #38b000;
-    font-size: 1.4rem;
-    margin-top: 0.6rem;
-    align-items: center;
-    justify-content: center;
+.bs--success {
+  color: #38b000;
 }
 
-.warning {
-    display: flex;
-    color: #f0ad4e;
-    font-size: 1.4rem;
-    margin-top: 0.6rem;
-    align-items: center;
-    justify-content: center;
+.bs--danger {
+  color: #d9534f;
 }
 
-.error {
-    display: flex;
-    color: #c1121f;
-    font-size: 1.4rem;
-    margin-top: 0.6rem;
-    align-items: center;
-    justify-content: center;
+.bs--warning {
+  color: #f0ad4e;
 }
 
-.error svg,
-.success svg,
-.warning svg {
-    margin-right: 6px;
+.error--message {
+  display: flex;
+  font-size: 1.4rem;
+  margin-top: 0.6rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.success--message {
+  display: flex;
+  font-size: 1.4rem;
+  margin-top: 0.6rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.error--message svg,
+.success--message svg {
+  margin-right: 6px;
 }
 
 .underline {
@@ -66,7 +66,6 @@ a {
   text-decoration: none;
 }
 
-/* Navbar Section */
 nav {
   top: 0;
   left: 0;
@@ -209,19 +208,19 @@ main {
 }
 
 .features {
-    padding: 0 2rem;
-    color: #6f7d92;
-    list-style: none;
-    font-size: 1.8rem;
+  padding: 0 2rem;
+  color: #6f7d92;
+  list-style: none;
+  font-size: 1.8rem;
 }
 
 .features li {
-    display: flex;
-    margin-top: 1.4rem;
+  display: flex;
+  margin-top: 1.4rem;
 }
 
 .features svg {
-    margin: 0 6px 6px 6px;
+  margin: 0 6px 6px 6px;
 }
 
 /* Subscribe Section */
@@ -272,7 +271,7 @@ main {
 }
 
 #btn--subscribe:hover {
-  background-color: #1A9937;
+  background-color: #1a9937;
 }
 
 /* Footer Section */
@@ -317,19 +316,18 @@ hr {
   margin-bottom: 1.2rem;
 }
 
-/* 404 Error */
-.error--page {
-    height: 100vh;
-    display: flex;
-    color: #6f7d92;
-    font-size: 1.82rem;
-    align-items: center;
-    flex-direction: column;
-    justify-content: center;
+.message--page {
+  height: 100vh;
+  display: flex;
+  color: #6f7d92;
+  font-size: 1.82rem;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.error--page p {
-    margin-top: 2rem;
+.message--page p {
+  margin-top: 2rem;
 }
 
 /* Styles for small screen devices */
@@ -356,7 +354,7 @@ hr {
 
   .features li {
     align-items: center;
-    flex-direction: column
+    flex-direction: column;
   }
 
   #intro--headline {
@@ -389,7 +387,8 @@ hr {
     margin: 3rem 2rem 1.5rem 2rem;
   }
 
-  .error--page {
+  .message--page {
     text-align: center;
-}
+    font-size: 1.3rem;
+  }
 }
