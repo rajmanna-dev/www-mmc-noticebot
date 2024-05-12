@@ -1,31 +1,37 @@
 import re
-import config
+import os
 from uuid import uuid4
-from pymongo import MongoClient # type: ignore
-from flask_mail import Mail, Message # type: ignore
+from pymongo import MongoClient
+from flask_mail import Mail, Message
 from datetime import datetime, timedelta
 from email_message import verification_email_content
 from flask import Flask, request, render_template, redirect
 
 app = Flask(__name__)
 
-client = MongoClient(config.MONGODB_URL)
+if os.environ.get('FLASK_ENV') == 'production':
+    app.config['DEBUG'] = False
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+else:
+    app.config['DEBUG'] = True
+
+
+client = MongoClient(os.environ.get('MONGODB_URL'))
 database = client.mmc_noticebot
 users_collection = database.users
 
 app.config.update(
-    MAIL_SERVER=config.MAIL_SERVER,
-    MAIL_PORT=config.MAIL_PORT,
-    MAIL_USE_TLS=config.MAIL_USE_TLS,
-    MAIL_USERNAME=config.FROM,
-    MAIL_PASSWORD=config.PASSWORD
+    MAIL_SERVER=os.environ.get('MAIL_SERVER'),
+    MAIL_PORT=os.environ.get('MAIL_PORT'),
+    MAIL_USE_TLS=bool(os.environ.get('MAIL_USE_TLS')),
+    MAIL_USERNAME=os.environ.get('FROM'),
+    MAIL_PASSWORD=os.environ.get('PASSWORD')
 )
 
 mail = Mail(app)
-email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')  # Regex for validate email format
+email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')
 
 
-# Validate the user with following credentials: `username`: Name of the user, `useremail`: User's email ID
 def validate_user(username, useremail):
     errors = []
     if not username:
@@ -47,9 +53,8 @@ def validate_user(username, useremail):
     return errors
 
 
-# Sent verification link to user's email address
 def send_verification_mail(username, useremail, verification_token):
-    msg = Message('Email Verification Required for Your Account', sender=config.FROM, recipients=[useremail])
+    msg = Message('Email Verification Required for Your Account', sender=os.environ.get('FROM'), recipients=[useremail])
     verification_link = request.url_root + f"verify?token={verification_token}"
     msg.body = verification_email_content(username, verification_link)
     try:

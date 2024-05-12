@@ -1,6 +1,6 @@
-/env
 /__pycache__
-.vscode
 .idea
+.vscode
+/env
+.env
 .prettierrc
-config.py
