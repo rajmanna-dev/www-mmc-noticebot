@@ -1,8 +1,8 @@
 import re
 import config
 from uuid import uuid4
-from pymongo import MongoClient
-from flask_mail import Mail, Message
+from pymongo import MongoClient # type: ignore
+from flask_mail import Mail, Message # type: ignore
 from datetime import datetime, timedelta
 from email_message import verification_email_content
 from flask import Flask, request, render_template, redirect
@@ -123,5 +123,5 @@ def page_not_found(e):
     return render_template('404.html')
 
 
-# if __name__ == '__main__':
-#     app.run(debug=True, host='127.0.0.1', port=int("5000"))
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
