@@ -4,4 +4,5 @@
 .idea
 .prettierrc
 .env
+config.py
 Dockerfile
