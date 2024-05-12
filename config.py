@@ -1,9 +1,0 @@
-DOMAIN = "http://www.mmccollege.co.in"
-NOTICE_URL = "http://www.mmccollege.co.in/NoticePage/Student%20Notice"
-MAIL_PORT=587
-MAIL_USE_TLS=True
-MAIL_SERVER='smtp.gmail.com'
-PASSWORD='ptle jqsh immz phyq'
-FROM='wts.devs.community@gmail.com'
-SECRET_KEY='257b273d73ecd209290bafc4fbc7a805037d10ccb32f201e0a36d0f13719cea9'
-MONGODB_URL='mongodb+srv://raj2021manna:95Ga9D3q3uwN6auN@noticebot.44bdk73.mongodb.net/'
