@@ -76,7 +76,7 @@ def scrape_notice():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(scrape_notice, 'interval', minutes=1)
+scheduler.add_job(scrape_notice, 'interval', minutes=30)
 scheduler.add_job(cleanup_expired_tokens, 'cron', hour=3)
 scheduler.start()
 
