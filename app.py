@@ -1,8 +1,8 @@
 import re
 import os
 from uuid import uuid4
-from pymongo import MongoClient
-from flask_mail import Mail, Message
+from pymongo import MongoClient # type: ignore
+from flask_mail import Mail, Message # type: ignore
 from datetime import datetime, timedelta
 from email_message import verification_email_content
 from flask import Flask, request, render_template, redirect
@@ -84,7 +84,7 @@ def index():
             })
             if send_verification_mail(user_name, user_email, verification_token):
                 message = True
-    return render_template('index.html', errros=None, message=message)
+    return render_template('index.html', errors=None, message=message)
 
 
 @app.route('/verify')

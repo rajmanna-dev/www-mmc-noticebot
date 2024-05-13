@@ -1,15 +1,15 @@
 import os
 import config
 import smtplib
-import requests
-import pdfplumber
+import requests # type: ignore
+import pdfplumber # type: ignore
 from time import sleep
-from bs4 import BeautifulSoup
-from pymongo import MongoClient
+from bs4 import BeautifulSoup # type: ignore
+from pymongo import MongoClient # type: ignore
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.background import BackgroundScheduler # type: ignore
 
 client = MongoClient(os.environ.get('MONGODB_URL'))
 database = client.mmc_noticebot
