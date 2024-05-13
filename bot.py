@@ -82,7 +82,7 @@ scheduler.start()
 
 try:
     while True:
-        sleep(5)
+        sleep(60)
 except (KeyboardInterrupt, SystemExit):
     scheduler.shutdown()
     smtp_server.quit()
