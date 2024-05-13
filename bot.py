@@ -30,12 +30,13 @@ def cleanup_expired_tokens():
 
 
 def send_mail(notice_title, notice_msg, subscribers):
-    message = MIMEMultipart()
-    message['From'] = sender_email
-    message['Subject'] = notice_title
-    message.attach(MIMEText(notice_msg, 'plain'))
-    message['To'] = ', '.join(subscribers)
-    smtp_server.sendmail(sender_email, subscribers, message.as_string())
+    if subscribers:
+        message = MIMEMultipart()
+        message['From'] = sender_email
+        message['Subject'] = notice_title
+        message.attach(MIMEText(notice_msg, 'plain'))
+        message['To'] = ', '.join(subscribers)
+        smtp_server.sendmail(sender_email, subscribers, message.as_string())
 
 
 def extract_data_from_pdf(file_link):
@@ -61,14 +62,13 @@ def scrape_notice():
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
     tr = soup.find_all('tr')[1]
-
     global previous_notice
     if tr != previous_notice:
         notice_title, notice_link = process_table_rows(tr)
         notice_text = extract_data_from_pdf(notice_link)
 
         if not notice_text:
-            notice_text = f"Unable to fetch notice content."
+            notice_text = "Unable to fetch notice content."
         subscribed_users = [user.get('confirmed_email') for user in
                             users_collection.find({'confirmed_email': {'$exists': True}})]
         send_mail(notice_title, f'{notice_text}\nDownload this notice: {notice_link}', subscribed_users)
@@ -76,7 +76,7 @@ def scrape_notice():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(scrape_notice, 'interval', minutes=30)
+scheduler.add_job(scrape_notice, 'interval', minutes=1)
 scheduler.add_job(cleanup_expired_tokens, 'cron', hour=3)
 scheduler.start()
 

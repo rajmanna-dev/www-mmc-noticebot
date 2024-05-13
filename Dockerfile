@@ -2,11 +2,17 @@ FROM python:3.12.1-alpine
 
 WORKDIR /app
 
+RUN apk update
+
+RUN apk add supervisor
+
 COPY . /app
 
 RUN pip install --upgrade pip
 
 RUN python3 -m pip install -r requirements.txt
+
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 ENV MAIL_PORT=587
 ENV MAIL_USE_TLS=True
@@ -19,4 +25,4 @@ ENV MONGODB_URL=mongodb+srv://raj2021manna:95Ga9D3q3uwN6auN@noticebot.44bdk73.mo
 
 EXPOSE 8000
 
-CMD ["gunicorn", "-k", "gevent" , "-b", "0.0.0.0:8000", "app:app"]
+CMD ["supervisord", "-n"]
