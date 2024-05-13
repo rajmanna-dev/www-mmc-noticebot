@@ -90,8 +90,9 @@ def scrape_notice():
 
 
 scheduler = BackgroundScheduler()
+scheduler.configure(timezone='Asia/Kolkata')
 scheduler.add_job(scrape_notice, 'interval', minutes=30)
-scheduler.add_job(cleanup_expired_tokens, 'cron', hour=3)
+scheduler.add_job(cleanup_expired_tokens, trigger='cron', hour=3)
 scheduler.start()
 
 try:
