@@ -17,6 +17,7 @@ database = client.mmc_noticebot
 users_collection = database.users
 
 previous_notice = []
+
 # SMTP setup
 sender_email = config.FROM
 password = config.PASSWORD
@@ -66,27 +67,38 @@ def process_table_rows(row):
 
 # Scrape the student notice page
 def scrape_notice():
-    url = config.NOTICE_URL
-    page = requests.get(url)
-    soup = BeautifulSoup(page.content, 'html.parser')
-    tr = soup.find_all('tr')[1]  # Get the first row
-    print("scraped!")  # TODO Remove this line later
+    try:
+        if not smtp_server.sock:
+            sender_email = config.FROM
+            password = config.PASSWORD
+            smtp_server.connect(config.MAIL_SERVER, config.MAIL_PORT)
+            smtp_server.starttls()
+            smtp_server.login(sender_email, password)
+        url = config.NOTICE_URL
+        page = requests.get(url)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        tr = soup.find_all('tr')[1]  # Get the first row
+        print("scraped!")  # TODO Remove this line later
 
-    global previous_notice
-    if tr != previous_notice:
-        notice_title, notice_link = process_table_rows(tr)
-        notice_text = extract_data_from_pdf(notice_link)
+        global previous_notice
+        if tr != previous_notice:
+            notice_title, notice_link = process_table_rows(tr)
+            notice_text = extract_data_from_pdf(notice_link)
 
-        # If notice text is empty
-        if not notice_text:
-            notice_text = f"Unable to fetch notice content."
-        subscribed_users = [user.get('confirmed_email') for user in
-                            users_collection.find({'confirmed_email': {'$exists': True}})]
-        send_mail(notice_title, f'{notice_text}\nDownload this notice: {notice_link}', subscribed_users)
-        previous_notice = tr
-    else:
-        # TODO Remove this line later
-        print("Notice already sent!")
+            # If notice text is empty
+            if not notice_text:
+                notice_text = "Unable to fetch notice content."
+            subscribed_users = [user.get('confirmed_email') for user in
+                                users_collection.find({'confirmed_email': {'$exists': True}})]
+            send_mail(notice_title, f'{notice_text}\nDownload this notice: {notice_link}', subscribed_users)
+            previous_notice = tr
+        else:
+            # TODO Remove this line later
+            print("Notice already sent!")
+    except smtplib.SMTPException as e:
+        print(f"SMTP Error: {e}")
+    finally:
+        smtp_server.quit()
 
 
 scheduler = BackgroundScheduler()
@@ -97,8 +109,14 @@ scheduler.start()
 
 try:
     while True:
-        sleep(5)
+        print('wakeup')
+        sleep(60)
 except (KeyboardInterrupt, SystemExit):
-    scheduler.shutdown()
-    smtp_server.quit()
-    client.close()
+    try:
+        if smtp_server.sock:
+            smtp_server.quit()
+    except Exception as e:
+        print(f"Error while quitting SMTP server: {e}")
+    finally:
+        scheduler.shutdown()
+        client.close()

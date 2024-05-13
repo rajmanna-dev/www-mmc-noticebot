@@ -79,7 +79,7 @@ def index():
             })
             if send_verification_mail(user_name, user_email, verification_token):
                 message = True
-    return render_template('index.html', errros=None, message=message)
+    return render_template('index.html', errors=None, message=message)
 
 
 @app.route('/verify')
