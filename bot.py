@@ -21,10 +21,9 @@ previous_notice = []
 # SMTP setup
 sender_email = config.FROM
 password = config.PASSWORD
-smtp_server = smtplib.SMTP(config.MAIL_SERVER, config.MAIL_PORT)
-smtp_server.starttls()
+smtp_server = smtplib.SMTP_SSL(config.MAIL_SERVER, 465)
+smtp_server.ehlo()
 smtp_server.login(sender_email, password)
-smtp_server.quit()
 
 # Cleanup expired tokens
 def cleanup_expired_tokens():
@@ -44,6 +43,7 @@ def send_mail(notice_title, notice_msg, subscribers):
         message.attach(MIMEText(notice_msg, 'plain'))
         message['To'] = ', '.join(subscribers)
         smtp_server.sendmail(sender_email, subscribers, message.as_string())
+        smtp_server.quit()
         print(f"Mail sent from {sender_email} to {subscribers}") # TODO Remove this line of code later
     except smtplib.SMTPException as e:
         print("SMTP Error: ", e)
@@ -82,24 +82,18 @@ def scrape_notice():
         page = requests.get(url)
         soup = BeautifulSoup(page.content, 'html.parser')
         tr = soup.find_all('tr')[1]  # Get the first row
-        print("scraped!")  # TODO Remove this line later
 
         global previous_notice
         if tr != previous_notice:
-            print('Enter the notice checker.')
             notice_title, notice_link = process_table_rows(tr)
             notice_text = extract_data_from_pdf(notice_link)
-            print('Notice data extracted')
 
             # If notice text is empty
             if not notice_text:
                 notice_text = "Unable to fetch notice content."
             subscribed_users = [user.get('confirmed_email') for user in
                                 users_collection.find({'confirmed_email': {'$exists': True}})]
-            print('Before sending mail')
             send_mail(notice_title, f"{notice_text}\nDownload this notice: {notice_link}", subscribed_users)
-            sleep(5)
-            print('After sending mail')
             previous_notice = tr
         else:
             # TODO Remove this line later
@@ -109,14 +103,13 @@ def scrape_notice():
 
 scheduler = BackgroundScheduler()
 scheduler.configure(timezone='Asia/Kolkata')
-scheduler.add_job(scrape_notice, trigger='interval', seconds=30)
+scheduler.add_job(scrape_notice, trigger='interval', minutes=3)
 scheduler.add_job(cleanup_expired_tokens, trigger='cron', hour=3)
 scheduler.start()
 
 try:
     while True:
-        sleep(5)
-        print('wakeup')
+        sleep(60)
 except (KeyboardInterrupt, SystemExit):
     try:
         if smtp_server.sock:
