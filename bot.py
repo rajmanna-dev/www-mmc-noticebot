@@ -22,58 +22,60 @@ previous_notice = []
 sender_email = config.FROM
 password = config.PASSWORD
 smtp_server = smtplib.SMTP(config.MAIL_SERVER, config.MAIL_PORT)
-smtp_server.starttls()
 smtp_server.login(sender_email, password)
-
 
 # Cleanup expired tokens
 def cleanup_expired_tokens():
-    expired_cutoff = datetime.now() - timedelta(hours=1)
-    users_collection.delete_many({'token_expiration': {'$lt': expired_cutoff}})
-    client.close()
+    try:
+        expired_cutoff = datetime.now() - timedelta(hours=1)
+        users_collection.delete_many({'token_expiration': {'$lt': expired_cutoff}})
+    except Exception as e:
+        print("Cleanup expired tokens error: ", e)
 
 
 # Send bulk emails
 def send_mail(notice_title, notice_msg, subscribers):
-    message = MIMEMultipart()
-    message['From'] = sender_email
-    message['Subject'] = notice_title
-    message.attach(MIMEText(notice_msg, 'plain'))
-    message['To'] = ', '.join(subscribers)
-    smtp_server.sendmail(sender_email, subscribers, message.as_string())
-    # TODO Remove this line of code later
-    print(f"Mail sent from {sender_email} to {subscribers}")
+    try:
+        message = MIMEMultipart()
+        message['From'] = sender_email
+        message['Subject'] = notice_title
+        message.attach(MIMEText(notice_msg, 'plain'))
+        message['To'] = ', '.join(subscribers)
+        smtp_server.sendmail(sender_email, subscribers, message.as_string())
+        print(f"Mail sent from {sender_email} to {subscribers}") # TODO Remove this line of code later
+    except smtplib.SMTPException as e:
+        print("SMTP Error: ", e)
 
 
 # Get text from notice pdf
 def extract_data_from_pdf(file_link):
-    r = requests.get(file_link)
-    with open('temp.pdf', 'wb') as f:
-        f.write(r.content)
+    try:
+        r = requests.get(file_link)
+        with open('temp.pdf', 'wb') as f:
+            f.write(r.content)
 
-    with pdfplumber.open("temp.pdf") as pdf:
-        pdf_data = ''.join([page.extract_text() for page in pdf.pages])
+        with pdfplumber.open("temp.pdf") as pdf:
+            pdf_data = ''.join([page.extract_text() for page in pdf.pages])
 
-    os.remove("temp.pdf")
-    return pdf_data
+        os.remove("temp.pdf")
+        return pdf_data
+    except Exception as e:
+        print("Extract data from pdf error: ", e)
 
 
 # Process the first row of notice table
 def process_table_rows(row):
-    notice_title = row.select_one('td:nth-of-type(2)').get_text()
-    notice_link = config.DOMAIN + row.select_one('td:nth-of-type(3) a')['href'].replace(' ', '%20')
-    return notice_title, notice_link
+    try:
+        notice_title = row.select_one('td:nth-of-type(2)').get_text()
+        notice_link = config.DOMAIN + row.select_one('td:nth-of-type(3) a')['href'].replace(' ', '%20')
+        return notice_title, notice_link
+    except Exception as e:
+        print("Process table rows error: ", e)
 
 
 # Scrape the student notice page
 def scrape_notice():
     try:
-        if not smtp_server.sock:
-            sender_email = config.FROM
-            password = config.PASSWORD
-            smtp_server.connect(config.MAIL_SERVER, config.MAIL_PORT)
-            smtp_server.starttls()
-            smtp_server.login(sender_email, password)
         url = config.NOTICE_URL
         page = requests.get(url)
         soup = BeautifulSoup(page.content, 'html.parser')
@@ -82,35 +84,36 @@ def scrape_notice():
 
         global previous_notice
         if tr != previous_notice:
+            print('Enter the notice checker.')
             notice_title, notice_link = process_table_rows(tr)
             notice_text = extract_data_from_pdf(notice_link)
+            print('Notice data extracted')
 
             # If notice text is empty
             if not notice_text:
                 notice_text = "Unable to fetch notice content."
             subscribed_users = [user.get('confirmed_email') for user in
                                 users_collection.find({'confirmed_email': {'$exists': True}})]
-            send_mail(notice_title, f'{notice_text}\nDownload this notice: {notice_link}', subscribed_users)
+            print('Before sending mail')
+            send_mail(notice_title, f"{notice_text}\nDownload this notice: {notice_link}", subscribed_users)
+            print('After sending mail')
             previous_notice = tr
         else:
             # TODO Remove this line later
             print("Notice already sent!")
-    except smtplib.SMTPException as e:
-        print(f"SMTP Error: {e}")
-    finally:
-        smtp_server.quit()
-
+    except Exception as e:
+        print(f"Scraping section Error: {e}")
 
 scheduler = BackgroundScheduler()
 scheduler.configure(timezone='Asia/Kolkata')
-scheduler.add_job(scrape_notice, 'interval', minutes=30)
+scheduler.add_job(scrape_notice, trigger='interval', minutes=5)
 scheduler.add_job(cleanup_expired_tokens, trigger='cron', hour=3)
 scheduler.start()
 
 try:
     while True:
-        print('wakeup')
         sleep(60)
+        print('wakeup')
 except (KeyboardInterrupt, SystemExit):
     try:
         if smtp_server.sock:
