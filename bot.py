@@ -22,7 +22,9 @@ previous_notice = []
 sender_email = config.FROM
 password = config.PASSWORD
 smtp_server = smtplib.SMTP(config.MAIL_SERVER, config.MAIL_PORT)
+smtp_server.starttls()
 smtp_server.login(sender_email, password)
+smtp_server.quit()
 
 # Cleanup expired tokens
 def cleanup_expired_tokens():
@@ -96,6 +98,7 @@ def scrape_notice():
                                 users_collection.find({'confirmed_email': {'$exists': True}})]
             print('Before sending mail')
             send_mail(notice_title, f"{notice_text}\nDownload this notice: {notice_link}", subscribed_users)
+            sleep(5)
             print('After sending mail')
             previous_notice = tr
         else:
@@ -106,13 +109,13 @@ def scrape_notice():
 
 scheduler = BackgroundScheduler()
 scheduler.configure(timezone='Asia/Kolkata')
-scheduler.add_job(scrape_notice, trigger='interval', minutes=5)
+scheduler.add_job(scrape_notice, trigger='interval', seconds=30)
 scheduler.add_job(cleanup_expired_tokens, trigger='cron', hour=3)
 scheduler.start()
 
 try:
     while True:
-        sleep(60)
+        sleep(5)
         print('wakeup')
 except (KeyboardInterrupt, SystemExit):
     try:
