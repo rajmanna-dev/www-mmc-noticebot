@@ -14,7 +14,7 @@ RUN python3 -m pip install -r requirements.txt
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-ENV MAIL_PORT=587
+ENV MAIL_PORT=465
 ENV MAIL_USE_TLS=True
 ENV FLASK_ENV=production
 ENV MAIL_SERVER=smtp.gmail.com
