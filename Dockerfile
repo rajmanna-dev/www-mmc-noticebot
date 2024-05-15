@@ -25,4 +25,4 @@ ENV MONGODB_URL=mongodb+srv://raj2021manna:95Ga9D3q3uwN6auN@noticebot.44bdk73.mo
 
 EXPOSE 8000
 
-CMD ["supervisord", "-n"]
+CMD ["supervisord", "-c", "/app/supervisord.conf"]
