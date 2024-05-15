@@ -1,10 +1,12 @@
 import re
 import os
 import logging
+import smtplib
 from uuid import uuid4
 from pymongo import MongoClient
-from flask_mail import Mail, Message
+from email.mime.text import MIMEText
 from datetime import datetime, timedelta
+from email.mime.multipart import MIMEMultipart
 from email_message import verification_email_content
 from flask import Flask, request, render_template, redirect
 
@@ -22,18 +24,10 @@ else:
 client = MongoClient(os.environ.get('MONGODB_URL'))
 database = client.mmc_noticebot
 users_collection = database.users
+sender_email = os.environ.get('FROM')
+password = os.environ.get('PASSWORD')
 
-app.config.update(
-    MAIL_SERVER=os.environ.get('MAIL_SERVER'),
-    MAIL_PORT=os.environ.get('MAIL_PORT'),
-    MAIL_USE_TLS=bool(os.environ.get('MAIL_USE_TLS')),
-    MAIL_USERNAME=os.environ.get('FROM'),
-    MAIL_PASSWORD=os.environ.get('PASSWORD')
-)
-
-mail = Mail(app)
 email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')
-
 
 def validate_user(username, useremail):
     errors = []
@@ -57,13 +51,21 @@ def validate_user(username, useremail):
 
 
 def send_verification_mail(username, useremail, verification_token):
-    msg = Message('Email Verification Required for Your Account', sender=os.environ.get('FROM'), recipients=[useremail])
-    verification_link = request.url_root + f"verify?token={verification_token}"
-    msg.body = verification_email_content(username, verification_link)
     try:
-        mail.send(msg)
+        message = MIMEMultipart()
+        message['From'] = sender_email
+        message['To'] = useremail
+        message['Subject'] = 'Email Verification Required for Your Account'
+        verification_link = request.url_root + f"verify?token={verification_token}"
+        message.attach(MIMEText(verification_email_content(username, verification_link), 'plain'))
+        # SMTP Setup
+        smtp_server = smtplib.SMTP_SSL(os.environ.get('MAIL_SERVER'), os.environ.get('MAIL_PORT'))
+        smtp_server.ehlo()
+        smtp_server.login(sender_email, password)
+        smtp_server.sendmail(sender_email, useremail, message.as_string())
+        smtp_server.quit()
         return True
-    except Exception as e:
+    except smtplib.SMTPException as e:
         logging.error("Error while sending mail: %s", e)
         return False
 
