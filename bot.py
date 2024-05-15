@@ -16,14 +16,11 @@ client = MongoClient(config.MONGODB_URL)
 database = client.mmc_noticebot
 users_collection = database.users
 
-previous_notice = []
+previous_notice = None
 
 # SMTP setup
 sender_email = config.FROM
 password = config.PASSWORD
-smtp_server = smtplib.SMTP_SSL(config.MAIL_SERVER, 465)
-smtp_server.ehlo()
-smtp_server.login(sender_email, password)
 
 # Cleanup expired tokens
 def cleanup_expired_tokens():
@@ -37,11 +34,16 @@ def cleanup_expired_tokens():
 # Send bulk emails
 def send_mail(notice_title, notice_msg, subscribers):
     try:
+        global smtp_server
         message = MIMEMultipart()
         message['From'] = sender_email
         message['Subject'] = notice_title
         message.attach(MIMEText(notice_msg, 'plain'))
         message['To'] = ', '.join(subscribers)
+
+        smtp_server = smtplib.SMTP_SSL(config.MAIL_SERVER, 465)
+        smtp_server.ehlo()
+        smtp_server.login(sender_email, password)
         smtp_server.sendmail(sender_email, subscribers, message.as_string())
         smtp_server.quit()
         print(f"Mail sent from {sender_email} to {subscribers}") # TODO Remove this line of code later
@@ -82,9 +84,11 @@ def scrape_notice():
         page = requests.get(url)
         soup = BeautifulSoup(page.content, 'html.parser')
         tr = soup.find_all('tr')[1]  # Get the first row
+        print('scraped!')
 
         global previous_notice
         if tr != previous_notice:
+            print('checked!')
             notice_title, notice_link = process_table_rows(tr)
             notice_text = extract_data_from_pdf(notice_link)
 
@@ -103,13 +107,14 @@ def scrape_notice():
 
 scheduler = BackgroundScheduler()
 scheduler.configure(timezone='Asia/Kolkata')
-scheduler.add_job(scrape_notice, trigger='interval', minutes=3)
+scheduler.add_job(scrape_notice, trigger='interval', minutes=30)
 scheduler.add_job(cleanup_expired_tokens, trigger='cron', hour=3)
 scheduler.start()
 
 try:
     while True:
         sleep(60)
+        print('Bot starting...')
 except (KeyboardInterrupt, SystemExit):
     try:
         if smtp_server.sock:
