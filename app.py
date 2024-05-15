@@ -1,11 +1,14 @@
 import re
 import os
+import logging
 from uuid import uuid4
-from pymongo import MongoClient # type: ignore
-from flask_mail import Mail, Message # type: ignore
+from pymongo import MongoClient
+from flask_mail import Mail, Message
 from datetime import datetime, timedelta
 from email_message import verification_email_content
 from flask import Flask, request, render_template, redirect
+
+logging.basicConfig(filename='app.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
 
@@ -60,7 +63,8 @@ def send_verification_mail(username, useremail, verification_token):
     try:
         mail.send(msg)
         return True
-    except Exception:
+    except Exception as e:
+        logging.error("Error while sending mail: %s", e)
         return False
 
 
