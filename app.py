@@ -13,14 +13,14 @@ from flask import Flask, request, render_template, redirect, url_for
 logging.basicConfig(filename='app.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
-app.config['DEBUG'] = os.environ.get('FLASK_ENV') != 'production'
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['DEBUG'] = os.environ['FLASK_ENV'] != 'production'
+app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 
-client = MongoClient(os.environ.get('MONGODB_URL'))
+client = MongoClient(os.environ['MONGODB_URL'])
 database = client.mmc_noticebot
 users_collection = database.users
-sender_email = os.environ.get('FROM')
-password = os.environ.get('PASSWORD')
+sender_email = os.environ['FROM']
+password = os.environ['PASSWORD']
 
 email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')
 
@@ -57,7 +57,7 @@ def send_verification_mail(username, useremail, verification_token):
         verification_link = url_for('verify_email', token=verification_token, _external=True)
         message.attach(MIMEText(verification_email_content(username, verification_link), 'plain'))
 
-        with smtplib.SMTP_SSL(os.environ.get('MAIL_SERVER'), os.environ.get('MAIL_PORT')) as smtp_server:
+        with smtplib.SMTP_SSL(os.environ['MAIL_SERVER'], os.environ['MAIL_PORT']) as smtp_server:
             smtp_server.login(sender_email, password)
             smtp_server.sendmail(sender_email, useremail, message.as_string())
             smtp_server.quit()

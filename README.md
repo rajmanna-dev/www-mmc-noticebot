@@ -1,6 +1,6 @@
 # MMC NoticeBot
 
-MMC NoticeBot is a Python application for scraping notices from a student notice page, extracting information from PDF notices, and sending email notifications to subscribed users.
+MMC-NoticeBot is a Flask application for scraping notices from a student notice page, extracting information from PDF notices, and sending email notifications to subscribed users.
 
 ## Features
 
@@ -21,9 +21,13 @@ MMC NoticeBot is a Python application for scraping notices from a student notice
 2. Install dependencies:
 
    ```bash
+   # Upgrade pip
+
+   pip install --upgrade pip
+
    # Install all the dependencies
 
-   pip install -r requirements.txt
+   python3 -m pip install -r requirements.txt
    ```
 
 3. Configure application settings in `config.py` and `.env` file for environment variables.
@@ -31,7 +35,7 @@ MMC NoticeBot is a Python application for scraping notices from a student notice
 4. Run the application:
 
    ```bash
-   # Run the web-app
+   # Run the flask app
    python app.py
 
    # Run the bot script
@@ -42,17 +46,17 @@ MMC NoticeBot is a Python application for scraping notices from a student notice
 
 You need to set up the following configuration parameters in `config.py`:
 
-- `DOMAIN`: Domain of the website (e.g., `'https://example.com'`).
-- `NOTICE_URL`: URL of the student notice page.
+- `DOMAIN`: Domain of the website (`'http://mmccollege.co.in'`).
+- `NOTICE_URL`: URL of the student notice page (`'http://mmccollege.co.in/NoticePage/Student%20Notice'`)
 
 You need to set up the following environment variables parameters in `.env`:
 
-- `FORM`: Sender email address for sending notifications.
+- `FORM`: Sender email address (e.g., example@example.com).
 - `PASSWORD`: Sender email password.
-- `MAIL_SERVER`: eg. smtp.gmail.com
-- `MAIL_PORT`: eg. 587
-- `MAIL_USE_TLS`: eg. True
-- `FLASK_ENV`: eg. development
+- `MAIL_SERVER`: Your mail server (e.g., smtp.gmail.com)
+- `MAIL_PORT`: Your mail server port (e.g., 587)
+- `MAIL_USE_TLS`: Transport Layer Security (e.g., True or False)
+- `FLASK_ENV`: Debug configuration (e.g., development or production)
 - `SECRET_KEY`: YOUR_FLASK_SECRET_KEY
 - `MONGODB_URL`: YOUR_MONGODB_DATABASE_URL
 
