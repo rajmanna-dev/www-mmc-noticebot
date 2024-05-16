@@ -35,9 +35,9 @@ def send_mail(notice_title, notice_msg, subscribers):
         try:
             message = MIMEMultipart()
             message['From'] = sender_email
+            message['To'] = ', '.join(subscribers)
             message['Subject'] = notice_title
             message.attach(MIMEText(notice_msg, 'plain'))
-            message['To'] = ', '.join(subscribers)
             
             with smtplib.SMTP_SSL(os.environ['MAIL_SERVER'], os.environ['MAIL_PORT']) as smtp_server:
                 smtp_server.login(sender_email, password)
@@ -56,11 +56,11 @@ def extract_data_from_pdf(file_link):
             f.write(response.content)
 
         with pdfplumber.open("temp.pdf") as pdf:
-            if len(pdf.pages) > 2:
+            if len(pdf.pages) > 1:
                 os.remove('temp.pdf')
                 return None
-            
-            pdf_data = ''.join([page.extract_text() for page in pdf.pages])
+            else:
+                pdf_data = ''.join([page.extract_text() for page in pdf.pages])
 
         os.remove("temp.pdf")
         return pdf_data
@@ -91,7 +91,8 @@ def scrape_notice():
             notice_title, notice_link = process_table_rows(tr)
 
             if notice_title and notice_link:
-                notice_text = extract_data_from_pdf(notice_link) or "Unable to fetch notice content due to unsupported file size or format."
+                notice_text = extract_data_from_pdf(notice_link) or "Unable to fetch notice content.\nThis can happen for various reasons such as:\n1. Unsupported format.\n2. Notice content spread across multiple pages.\nWe are still in development, so this issue may be fixed in the future."
+                
                 subscribed_users = [user.get('confirmed_email') for user in
                                     users_collection.find({'confirmed_email': {'$exists': True}})]
                 send_mail(notice_title, f'{notice_text}\nDownload this notice: {notice_link}', subscribed_users)

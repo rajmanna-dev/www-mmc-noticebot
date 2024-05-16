@@ -10,4 +10,6 @@ Please click on the following link to verify your email (expired after 1 hour):
 
 Should you encounter any difficulties or have any questions, please do not hesitate to reach out to our support team for assistance.
 
-Thank you for your cooperation.'''
+Thank you for your cooperation!
+
+- The Web Tools for Students Development Team'''
