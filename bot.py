@@ -33,7 +33,6 @@ def cleanup_expired_tokens():
 def send_mail(notice_title, notice_msg, subscribers):
     if subscribers:
         try:
-            global smtp_server
             message = MIMEMultipart()
             message['From'] = sender_email
             message['Subject'] = notice_title
@@ -57,6 +56,10 @@ def extract_data_from_pdf(file_link):
             f.write(response.content)
 
         with pdfplumber.open("temp.pdf") as pdf:
+            if len(pdf.pages) > 2:
+                os.remove('temp.pdf')
+                return None
+            
             pdf_data = ''.join([page.extract_text() for page in pdf.pages])
 
         os.remove("temp.pdf")
@@ -88,7 +91,7 @@ def scrape_notice():
             notice_title, notice_link = process_table_rows(tr)
 
             if notice_title and notice_link:
-                notice_text = extract_data_from_pdf(notice_link) or "Unable to fetch notice content due to unsupported text format."
+                notice_text = extract_data_from_pdf(notice_link) or "Unable to fetch notice content due to unsupported file size or format."
                 subscribed_users = [user.get('confirmed_email') for user in
                                     users_collection.find({'confirmed_email': {'$exists': True}})]
                 send_mail(notice_title, f'{notice_text}\nDownload this notice: {notice_link}', subscribed_users)
