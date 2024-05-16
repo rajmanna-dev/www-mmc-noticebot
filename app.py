@@ -8,18 +8,13 @@ from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email_message import verification_email_content
-from flask import Flask, request, render_template, redirect
+from flask import Flask, request, render_template, redirect, url_for
 
 logging.basicConfig(filename='app.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
-
-if os.environ.get('FLASK_ENV') == 'production':
-    app.config['DEBUG'] = False
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-else:
-    app.config['DEBUG'] = True
-
+app.config['DEBUG'] = os.environ.get('FLASK_ENV') != 'production'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
 client = MongoClient(os.environ.get('MONGODB_URL'))
 database = client.mmc_noticebot
@@ -31,6 +26,9 @@ email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
 
 def validate_user(username, useremail):
     errors = []
+    username = username.strip()
+    useremail = useremail.strip()
+
     if not username:
         errors.append('Name is required')
     elif len(username) < 3:
@@ -56,14 +54,13 @@ def send_verification_mail(username, useremail, verification_token):
         message['From'] = sender_email
         message['To'] = useremail
         message['Subject'] = 'Email Verification Required for Your Account'
-        verification_link = request.url_root + f"verify?token={verification_token}"
+        verification_link = url_for('verify_email', token=verification_token, _external=True)
         message.attach(MIMEText(verification_email_content(username, verification_link), 'plain'))
-        # SMTP Setup
-        smtp_server = smtplib.SMTP_SSL(os.environ.get('MAIL_SERVER'), os.environ.get('MAIL_PORT'))
-        smtp_server.ehlo()
-        smtp_server.login(sender_email, password)
-        smtp_server.sendmail(sender_email, useremail, message.as_string())
-        smtp_server.quit()
+
+        with smtplib.SMTP_SSL(os.environ.get('MAIL_SERVER'), os.environ.get('MAIL_PORT')) as smtp_server:
+            smtp_server.login(sender_email, password)
+            smtp_server.sendmail(sender_email, useremail, message.as_string())
+            smtp_server.quit()
         return True
     except smtplib.SMTPException as e:
         logging.error("Error while sending mail: %s", e)
@@ -72,25 +69,24 @@ def send_verification_mail(username, useremail, verification_token):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    message = False
     if request.method == 'POST':
-        user_name = request.form['userName'].lower().replace(' ', '')
-        user_email = request.form['userEmail'].lower()
-        check_errors = validate_user(user_name, user_email)
-        if check_errors:
-            return render_template('index.html', errors=check_errors)
-        else:
-            verification_token = str(uuid4())
-            token_expiration = datetime.now() + timedelta(hours=1)
-            users_collection.insert_one({
-                'username': user_name,
-                'useremail': user_email,
-                'verification_token': verification_token,
-                'token_expiration': token_expiration
-            })
-            if send_verification_mail(user_name, user_email, verification_token):
-                message = True
-    return render_template('index.html', errors=None, message=message)
+        user_name = request.form['userName'].strip().lower()
+        user_email = request.form['userEmail'].strip().lower()
+        errors = validate_user(user_name, user_email)
+        if errors:
+            return render_template('index.html', errors=errors)
+        
+        verification_token = str(uuid4())
+        token_expiration = datetime.now() + timedelta(hours=1)
+        users_collection.insert_one({
+            'username': user_name,
+            'useremail': user_email,
+            'verification_token': verification_token,
+            'token_expiration': token_expiration
+        })
+        if send_verification_mail(user_name, user_email, verification_token):
+            return render_template('index.html', message=True)
+    return render_template('index.html', errors=None, message=False)
 
 
 @app.route('/verify')
@@ -104,14 +100,11 @@ def verify_email():
                 {
                     '$unset': {'verification_token': '', 'token_expiration': ''},
                     '$set': {'confirmed_email': user['useremail']}
-                },
-                upsert=True
-            )
-            return redirect('/subscription-granted')
+                })
+            return redirect(url_for('subscription_granted'))
         else:
-            return redirect('/token-expired')
-    else:
-        return redirect('/invalid-token')
+            return redirect(url_for('token_expired'))
+    return redirect(url_for('invalid_token'))
 
 
 @app.route('/subscription-granted')
@@ -131,4 +124,4 @@ def invalid_token():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html')
+    return render_template('404.html'), 404
