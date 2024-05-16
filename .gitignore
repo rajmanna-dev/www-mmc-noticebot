@@ -1,8 +1,6 @@
-/env
 /__pycache__
-.vscode
 .idea
+.vscode
+/env
 .prettierrc
-.env
-Dockerfile
 *.log

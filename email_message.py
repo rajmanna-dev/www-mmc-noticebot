@@ -1,5 +1,5 @@
 def verification_email_content(username, verification_link):
-    return f'''Hello {username},
+    return f'''Dear {username},
 
 I hope this message finds you well.
 

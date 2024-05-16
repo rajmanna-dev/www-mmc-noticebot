@@ -1,6 +1,6 @@
 # MMC NoticeBot
 
-MMC NoticeBot is a Python application for scraping notices from a student notice page, extracting information from PDF notices, and sending email notifications to subscribed users.
+MMC-NoticeBot is a Flask application for scraping notices from a student notice page, extracting information from PDF notices, and sending email notifications to subscribed users.
 
 ## Features
 
@@ -14,40 +14,57 @@ MMC NoticeBot is a Python application for scraping notices from a student notice
 
    ```bash
    # Clone the repo
-   
+
    git clone https://github.com/rajmanna-dev/MMC-NoticeBot.git
-    ```
+   ```
+
 2. Install dependencies:
 
-    ```bash
+   ```bash
+   # Upgrade pip
+
+   pip install --upgrade pip
+
    # Install all the dependencies
-   
-    pip install -r requirements.txt
-    ```
-3. Configure application settings in `config.py`.
+
+   python3 -m pip install -r requirements.txt
+   ```
+
+3. Configure application settings in `config.py` and `.env` file for environment variables.
+
 4. Run the application:
 
    ```bash
-   # Run the web-app
+   # Run the flask app
    python app.py
-   
+
    # Run the bot script
    python bot.py
    ```
-   
+
 ## Configuration
 
 You need to set up the following configuration parameters in `config.py`:
 
-- `FORM`: Sender email address for sending notifications.
+- `DOMAIN`: Domain of the website (`'http://mmccollege.co.in'`).
+- `NOTICE_URL`: URL of the student notice page (`'http://mmccollege.co.in/NoticePage/Student%20Notice'`)
+
+You need to set up the following environment variables parameters in `.env`:
+
+- `FORM`: Sender email address (e.g., example@example.com).
 - `PASSWORD`: Sender email password.
-- `NOTICE_URL`: URL of the student notice page.
-- `DOMAIN`: Domain of the website (e.g., `'https://example.com'`).
+- `MAIL_SERVER`: Your mail server (e.g., smtp.gmail.com)
+- `MAIL_PORT`: Your mail server port (e.g., 587)
+- `MAIL_USE_TLS`: Transport Layer Security (e.g., True or False)
+- `FLASK_ENV`: Debug configuration (e.g., development or production)
+- `SECRET_KEY`: YOUR_FLASK_SECRET_KEY
+- `MONGODB_URL`: YOUR_MONGODB_DATABASE_URL
 
 ## Usage
 
+1. Run the app using `python app.py`.
 1. Run the bot using `python bot.py`.
-2. The application will scrape the notice page, extract notice content from PDFs, and send email notifications to subscribed users.
+1. The application will scrape the notice page, extract notice content from PDFs, and send email notifications to subscribed users.
 
 ## Contributing
 
