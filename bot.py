@@ -15,6 +15,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 logging.basicConfig(filename='bot.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 mongo_url = os.environ['MONGODB_URL']
+mail_server = os.environ['MAIL_SERVER']
+mail_port = os.environ['MAIL_PORT']
 sender_email = os.environ['FROM']
 password = os.environ['PASSWORD']
 previous_notice = None
@@ -31,7 +33,6 @@ def cleanup_expired_tokens():
         client, db = get_db()
         with client:
             db.users.delete_many({'token_expiration': {'$lt': expired_cutoff}})
-            
     except Exception as e:
         logging.error('Error cleaning up expired token: %s', e)
 
@@ -46,10 +47,9 @@ def send_mail(notice_title, notice_msg, subscribers):
                 message['Subject'] = notice_title
                 message.attach(MIMEText(notice_msg, 'plain'))
                 
-                with smtplib.SMTP_SSL(os.environ['MAIL_SERVER'], os.environ['MAIL_PORT']) as smtp_server:
+                with smtplib.SMTP_SSL(mail_server, mail_port) as smtp_server:
                     smtp_server.login(sender_email, password)
                     smtp_server.sendmail(sender_email, subscriber, message.as_string())
-
             except smtplib.SMTPException as e:
                 logging.error("Error while sending mail: %s", e)
 
@@ -112,12 +112,12 @@ def scrape_notice():
 
 scheduler = BackgroundScheduler()
 scheduler.configure(timezone='Asia/Kolkata')
-scheduler.add_job(scrape_notice, trigger='interval', minutes=1)
+scheduler.add_job(scrape_notice, trigger='interval', minutes=15)
 scheduler.add_job(cleanup_expired_tokens, trigger='cron', hour=3)
 scheduler.start()
 
 try:
     while True:
-        sleep(10)
+        sleep(60)
 except (KeyboardInterrupt, SystemExit):
     scheduler.shutdown()

@@ -16,18 +16,28 @@ app = Flask(__name__)
 app.config['DEBUG'] = os.environ['FLASK_ENV'] != 'production'
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 
-client = MongoClient(os.environ['MONGODB_URL'])
-database = client.mmc_noticebot
-users_collection = database.users
+mongo_url = os.environ['MONGODB_URL']
+mail_server = os.environ['MAIL_SERVER']
+mail_port = os.environ['MAIL_PORT']
 sender_email = os.environ['FROM']
 password = os.environ['PASSWORD']
 
 email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')
 
+
+client = MongoClient(mongo_url)
+db = client.mmc_noticebot
+
+@app.before_request
+def create_indexes():
+    db.users.create_index('useremail', unique=True)
+    db.users.create_index('verification_token', sparse=True)
+
+
 def validate_user(username, useremail):
     errors = []
     username = username.strip()
-    useremail = useremail.strip()
+    useremail = useremail.strip().lower()
 
     if not username:
         errors.append('Name is required')
@@ -42,7 +52,7 @@ def validate_user(username, useremail):
         errors.append('Bad input. Email is too long')
     elif not email_regex.match(useremail):
         errors.append('Invalid Email ID')
-    elif users_collection.count_documents({'useremail': useremail.lower()}) != 0:
+    elif db.users.count_documents({'useremail': useremail}) != 0:
         errors.append('Email already exists')
 
     return errors
@@ -60,7 +70,7 @@ def send_verification_mail(username, useremail, verification_token):
         with smtplib.SMTP_SSL(os.environ['MAIL_SERVER'], os.environ['MAIL_PORT']) as smtp_server:
             smtp_server.login(sender_email, password)
             smtp_server.sendmail(sender_email, useremail, message.as_string())
-            smtp_server.quit()
+
         return True
     except smtplib.SMTPException as e:
         logging.error("Error while sending mail: %s", e)
@@ -70,7 +80,7 @@ def send_verification_mail(username, useremail, verification_token):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        user_name = request.form['userName'].strip().lower()
+        user_name = request.form['userName'].strip()
         user_email = request.form['userEmail'].strip().lower()
         errors = validate_user(user_name, user_email)
         if errors:
@@ -78,12 +88,18 @@ def index():
         
         verification_token = str(uuid4())
         token_expiration = datetime.now() + timedelta(hours=1)
-        users_collection.insert_one({
-            'username': user_name,
-            'useremail': user_email,
-            'verification_token': verification_token,
-            'token_expiration': token_expiration
-        })
+
+        try:
+            db.users.insert_one({
+                'username': user_name,
+                'useremail': user_email,
+                'verification_token': verification_token,
+                'token_expiration': token_expiration
+            })
+        except errors.DuplicateKeyError:
+            errors.append('Email already exists')
+            return render_template('index.html', errors=errors)
+        
         if send_verification_mail(user_name, user_email, verification_token):
             return render_template('index.html', message=True)
     return render_template('index.html', errors=None, message=False)
@@ -93,9 +109,9 @@ def index():
 def verify_email():
     token = request.args.get('token')
     if token:
-        user = users_collection.find_one({'verification_token': token})
+        user = db.users.find_one({'verification_token': token})
         if user and user['token_expiration'] > datetime.now():
-            users_collection.update_one(
+            db.users.update_one(
                 {'_id': user['_id']},
                 {
                     '$unset': {'verification_token': '', 'token_expiration': ''},
