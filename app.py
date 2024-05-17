@@ -24,9 +24,9 @@ password = os.environ['PASSWORD']
 
 email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')
 
-
 client = MongoClient(mongo_url)
 db = client.mmc_noticebot
+
 
 @app.before_request
 def create_indexes():
@@ -67,7 +67,7 @@ def send_verification_mail(username, useremail, verification_token):
         verification_link = url_for('verify_email', token=verification_token, _external=True)
         message.attach(MIMEText(verification_email_content(username, verification_link), 'plain'))
 
-        with smtplib.SMTP_SSL(os.environ['MAIL_SERVER'], os.environ['MAIL_PORT']) as smtp_server:
+        with smtplib.SMTP_SSL(mail_server, mail_port) as smtp_server:
             smtp_server.login(sender_email, password)
             smtp_server.sendmail(sender_email, useremail, message.as_string())
 
