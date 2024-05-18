@@ -16,7 +16,6 @@ app = Flask(__name__)
 app.config['DEBUG'] = os.environ['FLASK_ENV'] != 'production'
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 
-mongo_url = os.environ['MONGODB_URL']
 mail_server = os.environ['MAIL_SERVER']
 mail_port = os.environ['MAIL_PORT']
 sender_email = os.environ['FROM']
@@ -24,6 +23,7 @@ password = os.environ['PASSWORD']
 
 email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')
 
+mongo_url = os.environ['MONGODB_URL']
 client = MongoClient(mongo_url)
 db = client.mmc_noticebot
 
