@@ -34,7 +34,7 @@ def cleanup_expired_tokens():
         with client:
             db.users.delete_many({'token_expiration': {'$lt': expired_cutoff}})
     except Exception as e:
-        logging.error('Error cleaning up expired token: %s', e)
+        logging.error('Error occurs while trying to cleaning up expired token: %s', e)
 
 
 def send_mail(notice_title, notice_msg, subscribers):
@@ -51,7 +51,7 @@ def send_mail(notice_title, notice_msg, subscribers):
                     smtp_server.login(sender_email, password)
                     smtp_server.sendmail(sender_email, subscriber, message.as_string())
             except smtplib.SMTPException as e:
-                logging.error("Error while sending mail: %s", e)
+                logging.error("Error occurs while trying to sending email: %s", e)
 
 
 def extract_data_from_pdf(file_link):
@@ -69,7 +69,7 @@ def extract_data_from_pdf(file_link):
 
         return pdf_data
     except Exception as e:
-        logging.error("Error while extracting data from notice pdf: %s", e)
+        logging.error("Error occurs while trying to extracting data from notice pdf: %s", e)
         return None
     finally:
         if os.path.exists('temp.pdf'):
@@ -82,7 +82,7 @@ def process_table_rows(row):
         notice_link = config.DOMAIN + row.select_one('td:nth-of-type(3) a')['href'].replace(' ', '%20')
         return notice_title, notice_link
     except Exception as e:
-        logging.error("Error while processing notice page: %s", e)
+        logging.error("Error occurs while trying to process notice content: %s", e)
         return None, None
 
 
@@ -107,7 +107,7 @@ def scrape_notice():
                 send_mail(notice_title, f'{notice_text}\nDownload this notice: {notice_link}', subscribed_users)
                 previous_notice = tr
     except Exception as e:
-        logging.error("Error while scraping notice: %s", e)
+        logging.error("Error occurs while trying to scrap the webpage: %s", e)
 
 
 scheduler = BackgroundScheduler()

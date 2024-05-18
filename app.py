@@ -73,7 +73,7 @@ def send_verification_mail(username, useremail, verification_token):
 
         return True
     except smtplib.SMTPException as e:
-        logging.error("Error while sending mail: %s", e)
+        logging.error("Error occurs while trying to sending email: %s", e)
         return False
 
 
