@@ -13,17 +13,17 @@ from flask import Flask, request, render_template, redirect, url_for
 logging.basicConfig(filename='app.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
-app.config['DEBUG'] = os.environ['FLASK_ENV'] != 'production'
-app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
+app.config['DEBUG'] = os.environ.get('FLASK_ENV') != 'production'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
-mail_server = os.environ['MAIL_SERVER']
-mail_port = os.environ['MAIL_PORT']
-sender_email = os.environ['FROM']
-password = os.environ['PASSWORD']
+mail_server = os.environ.get('MAIL_SERVER')
+mail_port = os.environ.get('MAIL_PORT')
+sender_email = os.environ.get('FROM')
+password = os.environ.get('PASSWORD')
 
 email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')
 
-mongo_url = os.environ['MONGODB_URL']
+mongo_url = os.environ.get('MONGODB_URL')
 client = MongoClient(mongo_url)
 db = client.mmc_noticebot
 

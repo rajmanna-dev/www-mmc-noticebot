@@ -14,13 +14,13 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 logging.basicConfig(filename='bot.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
-mail_server = os.environ['MAIL_SERVER']
-mail_port = os.environ['MAIL_PORT']
-sender_email = os.environ['FROM']
-password = os.environ['PASSWORD']
+mail_server = os.environ.get('MAIL_SERVER')
+mail_port = os.environ.get('MAIL_PORT')
+sender_email = os.environ.get('FROM')
+password = os.environ.get('PASSWORD')
 previous_notice = None
 
-mongo_url = os.environ['MONGODB_URL']
+mongo_url = os.environ.get('MONGODB_URL')
 
 def get_db():
     client = MongoClient(mongo_url)
