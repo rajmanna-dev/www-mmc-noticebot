@@ -15,24 +15,20 @@ from apscheduler.schedulers.background import BackgroundScheduler
 logging.basicConfig(filename='bot.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 mail_server = os.environ.get('MAIL_SERVER')
-mail_port = os.environ.get('MAIL_PORT')
-sender_email = os.environ.get('FROM')
+mail_port = int(os.environ.get('MAIL_PORT'))
+sender_email = os.environ.get('FROM', 'no-replay@gmail.com')
 password = os.environ.get('PASSWORD')
 previous_notice = None
 
 mongo_url = os.environ.get('MONGODB_URL')
-
-def get_db():
-    client = MongoClient(mongo_url)
-    return client, client.mmc_noticebot
+client = MongoClient(mongo_url)
+db = client.mmc_noticebot
 
 
 def cleanup_expired_tokens():
     try:
         expired_cutoff = datetime.now() - timedelta(hours=1)
-        client, db = get_db()
-        with client:
-            db.users.delete_many({'token_expiration': {'$lt': expired_cutoff}})
+        db.users.delete_many({'token_expiration': {'$lt': expired_cutoff}})
     except Exception as e:
         logging.error('Error occurs while trying to cleaning up expired token: %s', e)
 
@@ -68,7 +64,7 @@ def extract_data_from_pdf(file_link):
             pdf_data = ''.join([page.extract_text() for page in pdf.pages])
 
         return pdf_data
-    except Exception as e:
+    except (requests.RequestException, pdfplumber.PDFSyntaxError) as e:
         logging.error("Error occurs while trying to extracting data from notice pdf: %s", e)
         return None
     finally:
@@ -100,10 +96,8 @@ def scrape_notice():
             if notice_title and notice_link:
                 notice_text = extract_data_from_pdf(notice_link) or "Unable to fetch notice content.\nThis can happen for various reasons such as:\n1. Unsupported format.\n2. Notice content spread across multiple pages.\nWe are still in development, so this issue may be fixed in the future."
                 
-                client, db = get_db()
-                with client:
-                    subscribed_users = [user.get('confirmed_email') for user in
-                                    db.users.find({'confirmed_email': {'$exists': True}})]
+                subscribed_users = [user.get('confirmed_email') for user in
+                                db.users.find({'confirmed_email': {'$exists': True}})]
                 send_mail(notice_title, f'{notice_text}\nDownload this notice: {notice_link}', subscribed_users)
                 previous_notice = tr
     except Exception as e:

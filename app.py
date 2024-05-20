@@ -4,6 +4,7 @@ import logging
 import smtplib
 from uuid import uuid4
 from pymongo import MongoClient
+from flask_talisman import Talisman
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -15,6 +16,7 @@ logging.basicConfig(filename='app.log', level=logging.ERROR, format='%(asctime)s
 app = Flask(__name__)
 app.config['DEBUG'] = os.environ.get('FLASK_ENV') != 'production'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+Talisman(app)
 
 mail_server = os.environ.get('MAIL_SERVER')
 mail_port = os.environ.get('MAIL_PORT')
