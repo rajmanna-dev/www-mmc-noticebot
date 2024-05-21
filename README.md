@@ -63,8 +63,12 @@ You need to set up the following environment variables parameters in `.env`:
 ## Usage
 
 1. Run the app using `python app.py`.
-1. Run the bot using `python bot.py`.
-1. The application will scrape the notice page, extract notice content from PDFs, and send email notifications to subscribed users.
+2. Run the bot using `python bot.py`.
+3. The application will scrape the notice page, extract notice content from PDFs, and send email notifications to subscribed users.
+
+## Docker Usage
+
+`docker pull rajmannadev/mmc-noticebot:0.0.1.RELEASE`
 
 ## Contributing
 
