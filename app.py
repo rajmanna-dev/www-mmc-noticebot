@@ -30,12 +30,6 @@ client = MongoClient(mongo_url)
 db = client.mmc_noticebot
 
 
-@app.before_request
-def create_indexes():
-    db.users.create_index('useremail', unique=True)
-    db.users.create_index('verification_token', sparse=True)
-
-
 def validate_user(username, useremail):
     errors = []
     username = username.strip()
