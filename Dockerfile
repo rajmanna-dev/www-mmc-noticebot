@@ -3,7 +3,7 @@ FROM python:3.12.1-alpine
 WORKDIR /app
 
 RUN apk update
-RUN apk add supervisor nginx
+RUN apk add supervisor nginx curl
 
 COPY . /app
 COPY nginx.conf /etc/nginx/nginx.conf
