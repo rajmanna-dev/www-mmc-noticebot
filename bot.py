@@ -42,10 +42,11 @@ def send_mail(notice_title, notice_msg, subscribers):
                 message['To'] = subscriber
                 message['Subject'] = notice_title
                 message.attach(MIMEText(notice_msg, 'plain'))
-                
+
                 with smtplib.SMTP_SSL(mail_server, mail_port) as smtp_server:
                     smtp_server.login(sender_email, password)
                     smtp_server.sendmail(sender_email, subscriber, message.as_string())
+                sleep(8)
             except smtplib.SMTPException as e:
                 logging.error("Error occurs while trying to sending email: %s", e)
 
@@ -89,13 +90,13 @@ def scrape_notice():
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
         tr = soup.select('tr:nth-of-type(1)')[1]
-        
+
         if tr != previous_notice:
             notice_title, notice_link = process_table_rows(tr)
 
             if notice_title and notice_link:
                 notice_text = extract_data_from_pdf(notice_link) or "Unable to fetch notice content.\nThis can happen for various reasons such as:\n1. Unsupported format.\n2. Notice content spread across multiple pages.\nWe are still in development, so this issue may be fixed in the future."
-                
+
                 subscribed_users = [user.get('confirmed_email') for user in
                                 db.users.find({'confirmed_email': {'$exists': True}})]
                 send_mail(notice_title, f'{notice_text}\nDownload this notice: {notice_link}', subscribed_users)
