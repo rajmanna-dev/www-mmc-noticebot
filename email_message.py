@@ -13,3 +13,12 @@ Should you encounter any difficulties or have any questions, please do not hesit
 Thank you for your cooperation!
 
 - The Web Tools for Students Development Team'''
+
+
+unable_to_fetch_message = '''Unable to fetch notice content.
+    
+This can happen for various reasons such as:
+    1. Unsupported notice format.
+    2. Notice content spread across multiple pages.
+
+We are still in development, so this issue may be fixed in the future.'''

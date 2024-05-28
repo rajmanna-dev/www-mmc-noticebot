@@ -16,11 +16,11 @@ logging.basicConfig(filename='app.log', level=logging.ERROR, format='%(asctime)s
 app = Flask(__name__)
 app.config['DEBUG'] = os.environ.get('FLASK_ENV') != 'production'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-# Talisman(app)
+# Talisman(app)  # TODO Uncomment it later
 
 mail_server = os.environ.get('MAIL_SERVER')
 mail_port = os.environ.get('MAIL_PORT')
-sender_email = os.environ.get('FROM')
+sender_email = os.environ.get('FROM', 'no-replay@gmail.com')
 password = os.environ.get('PASSWORD')
 
 email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')
@@ -119,6 +119,11 @@ def verify_email():
     return redirect(url_for('invalid_token'))
 
 
+@app.route('/blog')
+def blog():
+    return render_template('blog.html')
+
+
 @app.route('/subscription-granted')
 def subscription_granted():
     return render_template('subscription_granted.html')
@@ -137,3 +142,6 @@ def invalid_token():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int("8000"))

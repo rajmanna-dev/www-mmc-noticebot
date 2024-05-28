@@ -116,6 +116,10 @@ nav svg {
   margin: 0 2rem;
 }
 
+.nav--items li:hover {
+  color: #e8e8e8;
+}
+
 .btn--report {
   font-weight: 500;
   padding: 6px 15px;
@@ -126,7 +130,7 @@ nav svg {
 
 main {
   top: 7rem;
-  position: absolute;
+  position: relative;
 }
 
 .introduction--section {
@@ -275,6 +279,7 @@ main {
 }
 
 footer {
+  margin-top: 12rem;
   padding: 4rem 0 1rem 0;
   background-color: #2a3649;
 }

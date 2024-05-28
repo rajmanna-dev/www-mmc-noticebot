@@ -30,7 +30,7 @@ MMC-NoticeBot is a Flask application for scraping notices from a student notice 
    python3 -m pip install -r requirements.txt
    ```
 
-3. Configure application settings in `config.py` and `.env` file for environment variables.
+3. Configure application settings in `.env` file for environment variables.
 
 4. Run the application:
 
@@ -44,14 +44,11 @@ MMC-NoticeBot is a Flask application for scraping notices from a student notice 
 
 ## Configuration
 
-You need to set up the following configuration parameters in `config.py`:
+You need to set up the following environment variables parameters in `.env`:
 
 - `DOMAIN`: Domain of the website (`'http://mmccollege.co.in'`).
 - `NOTICE_URL`: URL of the student notice page (`'http://mmccollege.co.in/NoticePage/Student%20Notice'`)
-
-You need to set up the following environment variables parameters in `.env`:
-
-- `FORM`: Sender email address (e.g., example@example.com).
+- `FORM`: Sender email address (e.g., example@example.com)
 - `PASSWORD`: Sender email password.
 - `MAIL_SERVER`: Your mail server (e.g., smtp.gmail.com)
 - `MAIL_PORT`: Your mail server port (e.g., 587)
@@ -68,7 +65,7 @@ You need to set up the following environment variables parameters in `.env`:
 
 ## Docker Usage
 
-`docker pull rajmannadev/mmc-noticebot:0.0.1.RELEASE`
+`docker pull rajmannadev/mmc-noticebot:<tag>`
 
 ## Contributing
 

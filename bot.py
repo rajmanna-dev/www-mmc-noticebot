@@ -1,9 +1,9 @@
 import os
-import config
 import logging
 import smtplib
 import requests
 import pdfplumber
+import email_message
 from time import sleep
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
@@ -30,7 +30,7 @@ def cleanup_expired_tokens():
         expired_cutoff = datetime.now() - timedelta(hours=1)
         db.users.delete_many({'token_expiration': {'$lt': expired_cutoff}})
     except Exception as e:
-        logging.error('Error occurs while trying to cleaning up expired token: %s', e)
+        logging.error('Error occurs while trying to cleaning up expired tokens: %s', e)
 
 
 def send_mail(notice_title, notice_msg, subscribers):
@@ -76,7 +76,7 @@ def extract_data_from_pdf(file_link):
 def process_table_rows(row):
     try:
         notice_title = row.select_one('td:nth-of-type(2)').get_text()
-        notice_link = config.DOMAIN + row.select_one('td:nth-of-type(3) a')['href'].replace(' ', '%20')
+        notice_link = os.environ.get('DOMAIN') + row.select_one('td:nth-of-type(3) a')['href'].replace(' ', '%20')
         return notice_title, notice_link
     except Exception as e:
         logging.error("Error occurs while trying to process notice content: %s", e)
@@ -86,7 +86,7 @@ def process_table_rows(row):
 def scrape_notice():
     global previous_notice
     try:
-        response = requests.get(config.NOTICE_URL)
+        response = requests.get(os.environ.get('NOTICE_URL'))
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
         tr = soup.select('tr:nth-of-type(1)')[1]
@@ -95,7 +95,7 @@ def scrape_notice():
             notice_title, notice_link = process_table_rows(tr)
 
             if notice_title and notice_link:
-                notice_text = extract_data_from_pdf(notice_link) or "Unable to fetch notice content.\nThis can happen for various reasons such as:\n1. Unsupported format.\n2. Notice content spread across multiple pages.\nWe are still in development, so this issue may be fixed in the future."
+                notice_text = extract_data_from_pdf(notice_link) or email_message.unable_to_fetch_message
 
                 subscribed_users = [user.get('confirmed_email') for user in
                                 db.users.find({'confirmed_email': {'$exists': True}})]
@@ -105,8 +105,7 @@ def scrape_notice():
         logging.error("Error occurs while trying to scrap the webpage: %s", e)
 
 
-scheduler = BackgroundScheduler()
-scheduler.configure(timezone='Asia/Kolkata')
+scheduler = BackgroundScheduler({'apscheduler.timezone': 'Asia/Kolkata'})
 scheduler.add_job(scrape_notice, trigger='interval', minutes=15)
 scheduler.add_job(cleanup_expired_tokens, trigger='cron', hour=3)
 scheduler.start()

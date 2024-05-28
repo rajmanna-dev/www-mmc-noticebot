@@ -20,6 +20,8 @@ ENV PASSWORD="ptle jqsh immz phyq"
 ENV FROM=wts.devs.community@gmail.com
 ENV SECRET_KEY=257b273d73ecd209290bafc4fbc7a805037d10ccb32f201e0a36d0f13719cea9
 ENV MONGODB_URL=mongodb+srv://raj2021manna:95Ga9D3q3uwN6auN@noticebot.44bdk73.mongodb.net/
+ENV DOMAIN=http://www.mmccollege.co.in
+ENV NOTICE_URL=http://www.mmccollege.co.in/NoticePage/Student%20Notice
 
 EXPOSE 80
 EXPOSE 8000

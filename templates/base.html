@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="google-adsense-account" content="ca-pub-7861498180239065" />
     <title>{% block title %} {% endblock %}</title>
     <link
       rel="shortcut icon"
@@ -158,5 +157,43 @@
     </nav>
 
     {% block body %} {% endblock %}
+
+    <footer>
+      <div class="footer--menus">
+        <div class="logo--section footer--logo">
+          <a class="nav--link" href="/">
+            <img
+              src="{{ url_for('static', filename='img/logo.png') }}"
+              class="logo--img"
+              width="30"
+              height="30"
+              alt="Bot"
+            />
+            MMC NoticeBot
+          </a>
+        </div>
+        <div class="footer--link">
+          <p class="footer-p">Links</p>
+          <a
+            href="https://github.com/rajmanna-dev/mmc-noticebot-opensource"
+            target="_blank"
+            >GitHub Open Source</a
+          >
+        </div>
+        <div class="support">
+          <p class="footer-p">Supports</p>
+          <ul class="footer--list">
+            <li>
+              <a href="mailto:wts.devs@yahoo.com">Email: wts.devs@yahoo.com</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <hr />
+      <div class="copyright--text text-center">
+        <p>Copyright &copy; 2024 Web Tools for Students</p>
+      </div>
+    </footer>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
   </body>
 </html>
