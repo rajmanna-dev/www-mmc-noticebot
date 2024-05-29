@@ -6,16 +6,19 @@ import pdfplumber
 import email_message
 from time import sleep
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from pymongo import MongoClient
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from apscheduler.schedulers.background import BackgroundScheduler
 
+load_dotenv()
+
 logging.basicConfig(filename='bot.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 mail_server = os.environ.get('MAIL_SERVER')
-mail_port = int(os.environ.get('MAIL_PORT'))
+mail_port = os.environ.get('MAIL_PORT')
 sender_email = os.environ.get('FROM', 'no-replay@gmail.com')
 password = os.environ.get('PASSWORD')
 previous_notice = None
@@ -34,21 +37,24 @@ def cleanup_expired_tokens():
 
 
 def send_mail(notice_title, notice_msg, subscribers):
-    if subscribers:
-        for subscriber in subscribers:
-            try:
-                message = MIMEMultipart()
-                message['From'] = sender_email
-                message['To'] = subscriber
-                message['Subject'] = notice_title
-                message.attach(MIMEText(notice_msg, 'plain'))
-
-                with smtplib.SMTP_SSL(mail_server, mail_port) as smtp_server:
-                    smtp_server.login(sender_email, password)
+    if not subscribers:
+        return
+    try:
+        with smtplib.SMTP_SSL(mail_server, mail_port) as smtp_server:
+            smtp_server.login(sender_email, password)
+            for subscriber in subscribers:
+                try:
+                    message = MIMEMultipart()
+                    message['From'] = sender_email
+                    message['To'] = subscriber
+                    message['Subject'] = notice_title
+                    message.attach(MIMEText(notice_msg, 'plain'))
                     smtp_server.sendmail(sender_email, subscriber, message.as_string())
-                sleep(8)
-            except smtplib.SMTPException as e:
-                logging.error("Error occurs while trying to sending email: %s", e)
+                    sleep(8)
+                except smtplib.SMTPException as e:
+                    logging.error("Error occurs while trying to send email to %s: %s", subscriber, e)
+    except smtplib.SMTPException as e:
+        logging.error("Error occurs while trying to sending email: %s", e)
 
 
 def extract_data_from_pdf(file_link):
@@ -106,12 +112,12 @@ def scrape_notice():
 
 
 scheduler = BackgroundScheduler({'apscheduler.timezone': 'Asia/Kolkata'})
-scheduler.add_job(scrape_notice, trigger='interval', minutes=15)
+scheduler.add_job(scrape_notice, trigger='interval', minutes=1)
 scheduler.add_job(cleanup_expired_tokens, trigger='cron', hour=3)
 scheduler.start()
 
 try:
     while True:
-        sleep(60)
+        sleep(6)
 except (KeyboardInterrupt, SystemExit):
     scheduler.shutdown()

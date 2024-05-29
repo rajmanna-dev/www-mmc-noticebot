@@ -3,6 +3,7 @@ import os
 import logging
 import smtplib
 from uuid import uuid4
+from dotenv import load_dotenv
 from pymongo import MongoClient
 from flask_talisman import Talisman
 from email.mime.text import MIMEText
@@ -10,6 +11,8 @@ from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email_message import verification_email_content
 from flask import Flask, request, render_template, redirect, url_for
+
+load_dotenv()
 
 logging.basicConfig(filename='app.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
