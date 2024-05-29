@@ -98,6 +98,10 @@ def index():
         
         if send_verification_mail(user_name, user_email, verification_token):
             return render_template('index.html', message=True)
+        else:
+            errors.append('Failed to send verification email.')
+            return render_template('index.html', errors=errors)
+        
     return render_template('index.html', errors=None, message=False)
 
 
@@ -142,6 +146,3 @@ def invalid_token():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int("8000"))

@@ -75,7 +75,7 @@ def extract_data_from_pdf(file_link):
 
 def process_table_rows(row):
     try:
-        notice_title = row.select_one('td:nth-of-type(2)').get_text()
+        notice_title = row.select_one('td:nth-of-type(2)').get_text().strip()
         notice_link = os.environ.get('DOMAIN') + row.select_one('td:nth-of-type(3) a')['href'].replace(' ', '%20')
         return notice_title, notice_link
     except Exception as e:

@@ -81,7 +81,3 @@ Contributions are welcome! If you'd like to contribute to MMC NoticeBot, please 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](license.txt) file for details.
-
-## Credits
-
-MMC NoticeBot was created by Web Tools for Students (WTS).
