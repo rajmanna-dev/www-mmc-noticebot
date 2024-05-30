@@ -9,8 +9,6 @@ services:
         condition: on-failure
     expose:
       - "8000"
-    volumes:
-      - ./supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
     environment:
       - FLASK_ENV=production
       - MAIL_PORT=465
@@ -20,11 +18,30 @@ services:
       - FROM=wts.devs.community@gmail.com
       - SECRET_KEY=257b273d73ecd209290bafc4fbc7a805037d10ccb32f201e0a36d0f13719cea9
       - MONGODB_URL=mongodb+srv://raj2021manna:95Ga9D3q3uwN6auN@noticebot.44bdk73.mongodb.net/
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    volumes:
+      - ./supervisord_app.conf:/etc/supervisor/conf.d/supervisord.conf
+    command: supervisord -c /etc/supervisor/conf.d/supervisord_app.conf
+
+  bot:
+    build: .
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - FLASK_ENV=production
+      - MAIL_PORT=465
+      - MAIL_USE_TLS=True
+      - MAIL_SERVER=smtp.gmail.com
+      - PASSWORD=ptle jqsh immz phyq
+      - FROM=wts.devs.community@gmail.com
+      - SECRET_KEY=257b273d73ecd209290bafc4fbc7a805037d10ccb32f201e0a36d0f13719cea9
+      - MONGODB_URL=mongodb+srv://raj2021manna:95Ga9D3q3uwN6auN@noticebot.44bdk73.mongodb.net/
+    depends_on:
+      - app
+    volumes:
+      - ./supervisord_bot.conf:/etc/supervisor/conf.d/supervisord.conf
+    command: supervisord -c /etc/supervisor/conf.d/supervisord_bot.conf
 
   nginx:
     image: nginx:latest
@@ -34,6 +51,7 @@ services:
       - "80:80"
     depends_on:
       - app
+    command: /usr/sbin/nginx -g "daemon off;"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost/ || exit 1"]
       interval: 30s

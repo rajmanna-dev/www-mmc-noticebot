@@ -2,15 +2,17 @@ FROM python:3.12.1-alpine
 
 WORKDIR /app
 
-RUN apk update
-RUN apk add supervisor nginx curl
+RUN apk update && \
+    apk add --no-cache supervisor nginx curl && \
+    pip install --upgrade pip
 
 COPY . /app
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-RUN pip install --upgrade pip
-RUN python3 -m pip install -r requirements.txt
+COPY supervisord_app.conf /etc/supervisor/conf.d/supervisord_app.conf
+COPY supervisord_bot.conf /etc/supervisor/conf.d/supervisord_bot.conf
+
+RUN pip install -r requirements.txt
 
 ENV MAIL_PORT=465
 ENV MAIL_USE_TLS=True
@@ -26,4 +28,4 @@ ENV NOTICE_URL=http://www.mmccollege.co.in/NoticePage/Student%20Notice
 EXPOSE 80
 EXPOSE 8000
 
-CMD ["supervisord", "-c", "/app/supervisord.conf"]
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord_app.conf"]
