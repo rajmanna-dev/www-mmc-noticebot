@@ -19,12 +19,13 @@ logging.basicConfig(filename='app.log', level=logging.ERROR, format='%(asctime)s
 app = Flask(__name__)
 app.config['DEBUG'] = os.environ.get('FLASK_ENV') != 'production'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+
 # Talisman(app)  # TODO Uncomment it later
 
 mail_server = os.environ.get('MAIL_SERVER')
 mail_port = os.environ.get('MAIL_PORT')
-sender_email = os.environ.get('FROM', 'no-replay@gmail.com')
-password = os.environ.get('PASSWORD')
+sender_email = os.environ.get('FROM_EMAIL', 'no-replay@gmail.com')
+password = os.environ.get('EMAIL_PASSWORD')
 
 email_regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b')
 
@@ -32,6 +33,7 @@ mongo_url = os.environ.get('MONGODB_URL')
 client = MongoClient(mongo_url)
 db = client.mmc_noticebot
 
+db.users.create_index('useremail', unique=True)
 
 def validate_user(username, useremail):
     errors = []
@@ -97,6 +99,10 @@ def index():
             })
         except errors.DuplicateKeyError:
             errors.append('Email already exists')
+            return render_template('index.html', errors=errors)
+        except Exception as e:
+            logging.error("Error inserting user to DB: %s", e)
+            errors.append('An error occurred. Please try again later.')
             return render_template('index.html', errors=errors)
         
         if send_verification_mail(user_name, user_email, verification_token):

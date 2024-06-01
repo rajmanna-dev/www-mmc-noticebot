@@ -19,14 +19,15 @@ logging.basicConfig(filename='bot.log', level=logging.ERROR, format='%(asctime)s
 
 mail_server = os.environ.get('MAIL_SERVER')
 mail_port = os.environ.get('MAIL_PORT')
-sender_email = os.environ.get('FROM', 'no-replay@gmail.com')
-password = os.environ.get('PASSWORD')
+sender_email = os.environ.get('FROM_EMAIL', 'no-replay@gmail.com')
+password = os.environ.get('EMAIL_PASSWORD')
 previous_notice = None
 
 mongo_url = os.environ.get('MONGODB_URL')
 client = MongoClient(mongo_url)
 db = client.mmc_noticebot
 
+db.users.create_index('confirm_email', unique=True, sparse=True)
 
 def cleanup_expired_tokens():
     try:

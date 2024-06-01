@@ -48,8 +48,8 @@ You need to set up the following environment variables parameters in `.env`:
 
 - `DOMAIN`: Domain of the website (`'http://mmccollege.co.in'`).
 - `NOTICE_URL`: URL of the student notice page (`'http://mmccollege.co.in/NoticePage/Student%20Notice'`)
-- `FORM`: Sender email address (e.g., example@example.com)
-- `PASSWORD`: Sender email password.
+- `FORM_EMAIL`: Sender email address (e.g., example@example.com)
+- `EMAIL_PASSWORD`: Sender email password.
 - `MAIL_SERVER`: Your mail server (e.g., smtp.gmail.com)
 - `MAIL_PORT`: Your mail server port (e.g., 587)
 - `MAIL_USE_TLS`: Transport Layer Security (e.g., True or False)
