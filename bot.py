@@ -113,7 +113,7 @@ def scrape_notice():
 
 
 scheduler = BackgroundScheduler({'apscheduler.timezone': 'Asia/Kolkata'})
-scheduler.add_job(scrape_notice, trigger='interval', minutes=15)
+scheduler.add_job(scrape_notice, trigger='interval', minutes=2)
 scheduler.add_job(cleanup_expired_tokens, trigger='cron', hour=3)
 scheduler.start()
 
