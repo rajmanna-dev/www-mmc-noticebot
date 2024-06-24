@@ -14,16 +14,16 @@ COPY supervisord_bot.conf /etc/supervisor/conf.d/supervisord_bot.conf
 
 RUN pip install -r requirements.txt
 
-ENV MAIL_PORT=465
-ENV MAIL_USE_TLS=True
-ENV FLASK_ENV=production
-ENV MAIL_SERVER=smtp.gmail.com
-ENV EMAIL_PASSWORD="ptle jqsh immz phyq"
-ENV FROM_EMAIL=wts.devs.community@gmail.com
-ENV SECRET_KEY=257b273d73ecd209290bafc4fbc7a805037d10ccb32f201e0a36d0f13719cea9
-ENV MONGODB_URL=mongodb+srv://raj2021manna:95Ga9D3q3uwN6auN@noticebot.44bdk73.mongodb.net/
-ENV DOMAIN=http://www.mmccollege.co.in
-ENV NOTICE_URL=http://www.mmccollege.co.in/NoticePage/Student%20Notice
+ENV MAIL_PORT=XXX
+ENV MAIL_USE_TLS=XXX
+ENV FLASK_ENV=XXX
+ENV MAIL_SERVER=XXX
+ENV EMAIL_PASSWORD=XXX
+ENV FROM_EMAIL=XXX
+ENV SECRET_KEY=XXX
+ENV MONGODB_URL=XXX
+ENV DOMAIN=XXX
+ENV NOTICE_URL=XXX
 
 EXPOSE 80
 EXPOSE 8000

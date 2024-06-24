@@ -20,7 +20,7 @@ app = Flask(__name__)
 app.config['DEBUG'] = os.environ.get('FLASK_ENV') != 'production'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
-# Talisman(app)  # TODO Uncomment it later
+# Talisman(app)  # FIXME Uncomment it later
 
 mail_server = os.environ.get('MAIL_SERVER')
 mail_port = os.environ.get('MAIL_PORT')
@@ -155,3 +155,6 @@ def invalid_token():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=int("5000"))
