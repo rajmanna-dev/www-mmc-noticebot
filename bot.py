@@ -104,9 +104,9 @@ def scrape_notice():
             if notice_title and notice_link:
                 notice_text = extract_data_from_pdf(notice_link) or email_message.unable_to_fetch_message
 
-                subscribed_users = [user.get('confirmed_email') for user in
+                subscribers = [user.get('confirmed_email') for user in
                                 db.users.find({'confirmed_email': {'$exists': True}})]
-                send_mail(notice_title, f'{notice_text}\nDownload this notice: {notice_link}', subscribed_users)
+                send_mail(notice_title, f'{notice_text}\nDownload this notice: {notice_link}', subscribers)
                 previous_notice = tr
     except Exception as e:
         logging.error("Error occurs while trying to scrap the webpage: %s", e)
